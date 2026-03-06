@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OBS Voice CSS Generator</title>
-  <link rel="stylesheet" href="./styles.css?v=20260307-1">
+  <link rel="stylesheet" href="./styles.css?v=20260307-3">
 </head>
 <body>
   <main class="app-shell">
@@ -74,7 +74,7 @@
             </label>
           </div>
 
-          <details class="full advanced-panel">
+          <details id="shared-advanced-panel" class="full advanced-panel">
             <summary>Advanced</summary>
             <div class="advanced-grid">
               <label>
@@ -146,7 +146,8 @@
           <p class="eyebrow">Users</p>
           <button id="add-user" class="ghost" type="button">Add User</button>
         </div>
-        <div id="user-tab-bar" class="user-tab-bar"></div>
+        <div id="user-tab-bar" class="user-tab-bar" role="tablist" aria-label="User tabs"></div>
+        <p id="user-empty-state" class="user-empty-state" hidden>No users yet. Click Add User to create the first slot.</p>
         <div id="user-list" class="user-list single-user"></div>
       </section>
     </section>
@@ -175,6 +176,7 @@
       </div>
       <div class="preview-stage">
         <div id="preview-canvas" class="preview-canvas"></div>
+        <p id="preview-empty-state" class="preview-empty-state" hidden>No included users to preview.</p>
       </div>
     </section>
   </main>
@@ -184,8 +186,8 @@
       <div class="user-card-header">
         <strong class="user-card-title">User</strong>
         <div class="user-card-actions">
-          <button class="ghost move-user-left" type="button">←</button>
-          <button class="ghost move-user-right" type="button">→</button>
+          <button class="ghost move-user-left" type="button" aria-label="Move user left">&larr;</button>
+          <button class="ghost move-user-right" type="button" aria-label="Move user right">&rarr;</button>
 
           <label class="toggle compact-toggle">
             <input class="is-enabled" type="checkbox" checked>
@@ -232,6 +234,6 @@
     </article>
   </template>
 
-  <script src="./app.js?v=20260307-1"></script>
+  <script src="./app.js?v=20260307-3"></script>
 </body>
 </html>

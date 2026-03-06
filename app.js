@@ -8,11 +8,14 @@ const copyButton = document.querySelector("#copy-css");
 const copyStatus = document.querySelector("#copy-status");
 const output = document.querySelector("#css-output");
 const previewCanvas = document.querySelector("#preview-canvas");
+const previewEmptyState = document.querySelector("#preview-empty-state");
 const userTabBar = document.querySelector("#user-tab-bar");
+const userEmptyState = document.querySelector("#user-empty-state");
 const tabSharedButton = document.querySelector("#tab-shared");
 const tabUsersButton = document.querySelector("#tab-users");
 const sharedPanel = document.querySelector("#panel-shared");
 const usersPanel = document.querySelector("#panel-users");
+const sharedAdvancedPanel = document.querySelector("#shared-advanced-panel");
 const clipPresetField = document.querySelector("#clip-preset");
 const clipLeftTopField = document.querySelector("#clip-left-top");
 const clipRightTopField = document.querySelector("#clip-right-top");
@@ -65,6 +68,27 @@ const SAMPLE_IMAGE_DATA_URL = `data:image/svg+xml;utf8,${encodeURIComponent(`
 let nextUserNumber = 1;
 let usersState = [];
 let activeUserId = null;
+let statusTimeoutId = null;
+
+function setStatus(message = "", type = "info", persist = false) {
+  if (statusTimeoutId) {
+    clearTimeout(statusTimeoutId);
+    statusTimeoutId = null;
+  }
+
+  copyStatus.textContent = message;
+  copyStatus.classList.toggle("is-empty", !message);
+  copyStatus.classList.toggle("is-error", type === "error");
+
+  if (message && !persist) {
+    statusTimeoutId = window.setTimeout(() => {
+      copyStatus.textContent = "";
+      copyStatus.classList.add("is-empty");
+      copyStatus.classList.remove("is-error");
+      statusTimeoutId = null;
+    }, 2800);
+  }
+}
 
 function setActiveTab(tabName) {
   const isShared = tabName === "shared";
@@ -72,6 +96,8 @@ function setActiveTab(tabName) {
   tabUsersButton.classList.toggle("is-active", !isShared);
   tabSharedButton.setAttribute("aria-selected", String(isShared));
   tabUsersButton.setAttribute("aria-selected", String(!isShared));
+  tabSharedButton.tabIndex = isShared ? 0 : -1;
+  tabUsersButton.tabIndex = isShared ? -1 : 0;
   sharedPanel.hidden = !isShared;
   usersPanel.hidden = isShared;
   sharedPanel.classList.toggle("is-active", isShared);
@@ -147,6 +173,7 @@ function readSharedSettings() {
     sharedSizePreset: sharedSizePresetField.value,
     sharedDisplayWidth: Math.max(1, Number(sharedDisplayWidthField.value) || 90),
     sharedDisplayHeight: Math.max(1, Number(sharedDisplayHeightField.value) || 160),
+    advancedOpen: sharedAdvancedPanel.open,
     enableGlow: document.querySelector("#enable-glow").checked,
     enableBobbing: document.querySelector("#enable-bobbing").checked
   };
@@ -164,6 +191,7 @@ function setSharedSettings(sharedSettings) {
   sharedSizePresetField.value = sharedSettings.sharedSizePreset || "medium";
   sharedDisplayWidthField.value = String(sharedSettings.sharedDisplayWidth ?? 90);
   sharedDisplayHeightField.value = String(sharedSettings.sharedDisplayHeight ?? 160);
+  sharedAdvancedPanel.open = sharedSettings.advancedOpen ?? false;
   document.querySelector("#bob-distance").value = String(sharedSettings.bobDistance ?? 4);
   document.querySelector("#bob-duration").value = String(sharedSettings.bobDuration ?? 0.6);
   document.querySelector("#enable-glow").checked = sharedSettings.enableGlow ?? true;
@@ -386,6 +414,14 @@ function renderPreview() {
   const labelHeight = 26;
   const nameInset = 4;
   previewCanvas.innerHTML = "";
+  previewEmptyState.hidden = users.length > 0;
+
+  if (users.length === 0) {
+    previewCanvas.style.width = "100%";
+    previewCanvas.style.height = "0";
+    return;
+  }
+
   const minTop = users.reduce((currentMin, user) => Math.min(currentMin, user.topOffset), 0);
 
   const width = users.reduce((currentMax, user) => {
@@ -485,6 +521,7 @@ function createUserRow(initialValues = {}) {
   nextUserNumber += 1;
   updateUserTitle(card);
   card.dataset.internalId = user.internalId;
+  card.classList.toggle("is-disabled", !user.enabled);
 
   card.addEventListener("input", (event) => {
     const targetUser = usersState.find((entry) => entry.internalId === user.internalId);
@@ -501,7 +538,8 @@ function createUserRow(initialValues = {}) {
     targetUser.enabled = enabledField.checked;
     targetUser.speaking = speakingField.checked;
     targetUser.dataUrl = dataUrlField.value.trim();
-    copyStatus.textContent = "";
+    card.classList.toggle("is-disabled", !targetUser.enabled);
+    setStatus("");
     renderUserTabs();
     updateOutput();
   });
@@ -525,10 +563,10 @@ function createUserRow(initialValues = {}) {
       if (targetUser) {
         targetUser.dataUrl = dataUrlField.value;
       }
-      copyStatus.textContent = "";
+      setStatus("");
       updateOutput();
     } catch (error) {
-      copyStatus.textContent = "Image resize failed. Try a different file.";
+      setStatus("Image resize failed. Try a different file.", "error", true);
     }
   });
 
@@ -539,7 +577,7 @@ function createUserRow(initialValues = {}) {
     }
 
     [usersState[index - 1], usersState[index]] = [usersState[index], usersState[index - 1]];
-    copyStatus.textContent = "";
+    setStatus("");
     renderUserTabs();
     renderActiveUserEditor();
     updateOutput();
@@ -552,7 +590,7 @@ function createUserRow(initialValues = {}) {
     }
 
     [usersState[index], usersState[index + 1]] = [usersState[index + 1], usersState[index]];
-    copyStatus.textContent = "";
+    setStatus("");
     renderUserTabs();
     renderActiveUserEditor();
     updateOutput();
@@ -563,7 +601,7 @@ function createUserRow(initialValues = {}) {
     if (activeUserId === user.internalId) {
       activeUserId = usersState[0]?.internalId || null;
     }
-    copyStatus.textContent = "";
+    setStatus("");
     renderUserTabs();
     renderActiveUserEditor();
     updateOutput();
@@ -578,19 +616,40 @@ function createUserRow(initialValues = {}) {
 
 function renderUserTabs() {
   userTabBar.innerHTML = "";
+  userEmptyState.hidden = usersState.length > 0;
 
-  usersState.forEach((user) => {
+  usersState.forEach((user, index) => {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "user-tab-button";
+    button.setAttribute("role", "tab");
+    button.id = `user-tab-${user.internalId}`;
+    button.setAttribute("aria-controls", `user-panel-${user.internalId}`);
+    const isActive = user.internalId === activeUserId;
     if (user.internalId === activeUserId) {
       button.classList.add("is-active");
     }
+    button.classList.toggle("is-disabled-user", !user.enabled);
+    button.setAttribute("aria-selected", String(isActive));
+    button.tabIndex = isActive ? 0 : -1;
     button.textContent = user.label || user.userId || `User ${usersState.indexOf(user) + 1}`;
     button.addEventListener("click", () => {
       activeUserId = user.internalId;
       renderUserTabs();
       renderActiveUserEditor();
+    });
+    button.addEventListener("keydown", (event) => {
+      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") {
+        return;
+      }
+
+      event.preventDefault();
+      const direction = event.key === "ArrowRight" ? 1 : -1;
+      const nextIndex = (index + direction + usersState.length) % usersState.length;
+      activeUserId = usersState[nextIndex].internalId;
+      renderUserTabs();
+      renderActiveUserEditor();
+      userTabBar.querySelector(".user-tab-button.is-active")?.focus();
     });
     userTabBar.append(button);
   });
@@ -602,6 +661,23 @@ function renderActiveUserEditor() {
   if (!activeUser?.editorCard) {
     return;
   }
+
+  activeUser.editorCard.id = `user-panel-${activeUser.internalId}`;
+  activeUser.editorCard.setAttribute("role", "tabpanel");
+  activeUser.editorCard.setAttribute("aria-labelledby", `user-tab-${activeUser.internalId}`);
+
+  const activeIndex = usersState.findIndex((user) => user.internalId === activeUser.internalId);
+  const moveLeftButton = activeUser.editorCard.querySelector(".move-user-left");
+  const moveRightButton = activeUser.editorCard.querySelector(".move-user-right");
+
+  if (moveLeftButton) {
+    moveLeftButton.disabled = activeIndex <= 0;
+  }
+
+  if (moveRightButton) {
+    moveRightButton.disabled = activeIndex === -1 || activeIndex >= usersState.length - 1;
+  }
+
   userList.append(activeUser.editorCard);
 }
 
@@ -649,7 +725,7 @@ sharedForm.addEventListener("input", (event) => {
     detectSharedSizePreset();
   }
 
-  copyStatus.textContent = "";
+  setStatus("");
   updateOutput();
 });
 
@@ -658,7 +734,7 @@ clipPresetField.addEventListener("change", () => {
     applyClipPreset(clipPresetField.value);
   }
 
-  copyStatus.textContent = "";
+  setStatus("");
   updateOutput();
 });
 
@@ -667,13 +743,14 @@ sharedSizePresetField.addEventListener("change", () => {
     applySharedSizePreset(sharedSizePresetField.value);
   }
 
-  copyStatus.textContent = "";
+  setStatus("");
   updateOutput();
 });
 
 addUserButton.addEventListener("click", () => {
   createUserRow();
-  copyStatus.textContent = "";
+  setActiveTab("users");
+  setStatus("");
   updateOutput();
 });
 
@@ -683,6 +760,22 @@ tabSharedButton.addEventListener("click", () => {
 
 tabUsersButton.addEventListener("click", () => {
   setActiveTab("users");
+});
+
+tabSharedButton.addEventListener("keydown", (event) => {
+  if (event.key === "ArrowRight") {
+    event.preventDefault();
+    setActiveTab("users");
+    tabUsersButton.focus();
+  }
+});
+
+tabUsersButton.addEventListener("keydown", (event) => {
+  if (event.key === "ArrowLeft") {
+    event.preventDefault();
+    setActiveTab("shared");
+    tabSharedButton.focus();
+  }
 });
 
 saveJsonButton.addEventListener("click", () => {
@@ -695,7 +788,7 @@ saveJsonButton.addEventListener("click", () => {
   anchor.download = "obs-voice-css-config.json";
   anchor.click();
   URL.revokeObjectURL(url);
-  copyStatus.textContent = "Saved JSON config.";
+  setStatus("Saved JSON config.");
 });
 
 loadJsonField.addEventListener("change", async (event) => {
@@ -707,9 +800,9 @@ loadJsonField.addEventListener("change", async (event) => {
   try {
     const text = await file.text();
     importState(JSON.parse(text));
-    copyStatus.textContent = "Loaded JSON config.";
+    setStatus("Loaded JSON config.");
   } catch (error) {
-    copyStatus.textContent = "JSON load failed. Check the file format.";
+    setStatus("JSON load failed. Check the file format.", "error", true);
   } finally {
     loadJsonField.value = "";
   }
@@ -718,9 +811,9 @@ loadJsonField.addEventListener("change", async (event) => {
 copyButton.addEventListener("click", async () => {
   try {
     await navigator.clipboard.writeText(output.value);
-    copyStatus.textContent = "Copied CSS to clipboard.";
+    setStatus("Copied CSS to clipboard.");
   } catch (error) {
-    copyStatus.textContent = "Clipboard copy failed. Copy the CSS manually.";
+    setStatus("Clipboard copy failed. Copy the CSS manually.", "error", true);
   }
 });
 
@@ -728,4 +821,5 @@ applyClipPreset("medium");
 applySharedSizePreset("medium");
 createUserRow({ label: "User 1", userId: "123456789012345678" });
 setActiveTab("shared");
+setStatus("");
 updateOutput();

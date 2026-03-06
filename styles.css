@@ -288,6 +288,15 @@ select option {
   padding-bottom: 4px;
 }
 
+.user-empty-state {
+  margin: 16px 0 0;
+  padding: 14px 16px;
+  border: 1px dashed rgba(138, 212, 255, 0.18);
+  border-radius: 14px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.03);
+}
+
 .user-tab-button {
   min-height: 40px;
   max-width: 220px;
@@ -308,11 +317,40 @@ select option {
   color: var(--text);
 }
 
+.user-tab-button.is-disabled-user {
+  opacity: 0.56;
+}
+
+.user-tab-button:focus-visible,
+.tab-button:focus-visible,
+.ghost:focus-visible,
+.danger:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible {
+  outline: 2px solid rgba(138, 212, 255, 0.78);
+  outline-offset: 2px;
+}
+
+.ghost:disabled,
+.danger:disabled,
+.user-tab-button:disabled,
+.tab-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .user-card {
   padding: 16px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.04);
+}
+
+.user-card.is-disabled {
+  background: rgba(255, 255, 255, 0.025);
+  border-color: rgba(255, 255, 255, 0.05);
 }
 
 .user-card-actions {
@@ -321,6 +359,19 @@ select option {
   justify-content: flex-end;
   gap: 10px;
   flex-wrap: wrap;
+}
+
+.user-card.is-disabled .user-card-title,
+.user-card.is-disabled .user-grid,
+.user-card.is-disabled .file-picker > span,
+.user-card.is-disabled .user-grid label > span:first-child {
+  opacity: 0.72;
+}
+
+.move-user-left,
+.move-user-right {
+  min-width: 46px;
+  padding-inline: 0;
 }
 
 .user-card-title {
@@ -380,6 +431,15 @@ select option {
   position: relative;
   min-height: 280px;
   min-width: 100%;
+}
+
+.preview-empty-state {
+  margin: 0;
+  padding: 18px 16px;
+  border: 1px dashed rgba(138, 212, 255, 0.16);
+  border-radius: 16px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .preview-card {
@@ -445,6 +505,15 @@ select option {
   min-height: 1.4em;
   margin: 10px 0 0;
   color: var(--accent);
+  transition: opacity 0.18s ease;
+}
+
+.copy-status.is-empty {
+  opacity: 0;
+}
+
+.copy-status.is-error {
+  color: var(--danger);
 }
 
 @media (max-width: 1180px) {
