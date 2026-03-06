@@ -8,114 +8,147 @@
 </head>
 <body>
   <main class="app-shell">
-    <section class="panel controls">
+    <section class="panel settings-panel">
       <div class="panel-header">
         <p class="eyebrow">OBS Custom CSS</p>
         <h1>Generator</h1>
       </div>
+      <div class="tab-bar" role="tablist" aria-label="Settings tabs">
+        <button id="tab-shared" class="tab-button is-active" type="button" role="tab" aria-selected="true" aria-controls="panel-shared">Shared</button>
+        <button id="tab-users" class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="panel-users">Users</button>
+      </div>
 
+      <section id="panel-shared" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-shared">
       <form id="shared-form" class="form-grid">
-        <label>
-          <span>Container Selector</span>
-          <input id="container-selector" name="containerSelector" type="text" value=".voice_states" spellcheck="false">
-        </label>
+          <label>
+            <span>Slot Spacing (px)</span>
+            <input id="slot-spacing" name="slotSpacing" type="number" min="0" step="1" value="78">
+          </label>
 
-        <label>
-          <span>Speaking Class</span>
-          <input id="speaking-class" name="speakingClass" type="text" value="wrapper_speaking" spellcheck="false">
-        </label>
+          <label>
+            <span>Overlap (px)</span>
+            <input id="overlap" name="overlap" type="number" min="0" step="1" value="30">
+          </label>
 
-        <label>
-          <span>Slot Spacing (px)</span>
-          <input id="slot-spacing" name="slotSpacing" type="number" min="0" step="1" value="78">
-        </label>
-
-        <label>
-          <span>Overlap (px)</span>
-          <input id="overlap" name="overlap" type="number" min="0" step="1" value="30">
-        </label>
-
-        <label>
-          <span>Z Index Base</span>
-          <input id="z-index-base" name="zIndexBase" type="number" step="1" value="10">
-        </label>
-
-        <label>
-          <span>Min Height (px)</span>
-          <input id="min-height" name="minHeight" type="number" min="1" step="1" value="96">
-        </label>
-
-        <label>
-          <span>Clip Preset</span>
-          <select id="clip-preset" name="clipPreset">
-            <option value="light">Light</option>
-            <option value="medium" selected>Medium</option>
+          <label>
+            <span>Clip Preset (4 points)</span>
+            <select id="clip-preset" name="clipPreset">
+              <option value="light">Light</option>
+              <option value="medium" selected>Medium</option>
             <option value="strong">Strong</option>
             <option value="extreme">Extreme</option>
             <option value="custom">Custom</option>
-          </select>
-        </label>
+            </select>
+          </label>
 
-        <label>
-          <span>Resize Max Width (px)</span>
-          <input id="resize-max-width" name="resizeMaxWidth" type="number" min="1" step="1" value="216">
-        </label>
+          <label>
+            <span>Image Size Preset (W/H)</span>
+            <select id="shared-size-preset" name="sharedSizePreset">
+              <option value="small">Small</option>
+              <option value="medium" selected>Medium</option>
+              <option value="large">Large</option>
+              <option value="xlarge">XL</option>
+              <option value="custom">Custom</option>
+            </select>
+          </label>
 
-        <label>
-          <span>Resize Max Height (px)</span>
-          <input id="resize-max-height" name="resizeMaxHeight" type="number" min="1" step="1" value="384">
-        </label>
+          <label>
+            <span>Min Height (px)</span>
+            <input id="min-height" name="minHeight" type="number" min="1" step="1" value="96">
+          </label>
 
-        <label>
-          <span>Clip Left Top (%)</span>
-          <input id="clip-left-top" name="clipLeftTop" type="number" min="0" max="100" step="1" value="24">
-        </label>
+          <label>
+            <span>Resize Max Width (px)</span>
+            <input id="resize-max-width" name="resizeMaxWidth" type="number" min="1" step="1" value="216">
+          </label>
 
-        <label>
-          <span>Clip Right Top (%)</span>
-          <input id="clip-right-top" name="clipRightTop" type="number" min="0" max="100" step="1" value="100">
-        </label>
-
-        <label>
-          <span>Clip Right Bottom (%)</span>
-          <input id="clip-right-bottom" name="clipRightBottom" type="number" min="0" max="100" step="1" value="76">
-        </label>
-
-        <label>
-          <span>Clip Left Bottom (%)</span>
-          <input id="clip-left-bottom" name="clipLeftBottom" type="number" min="0" max="100" step="1" value="0">
-        </label>
-
-        <label>
-          <span>Bobbing Distance (px)</span>
-          <input id="bob-distance" name="bobDistance" type="number" min="0" step="1" value="4">
-        </label>
-
-        <label>
-          <span>Bobbing Duration (s)</span>
-          <input id="bob-duration" name="bobDuration" type="number" min="0.1" step="0.1" value="0.6">
-        </label>
-
-        <div class="full toggle-row">
-          <label class="toggle">
-            <input id="enable-glow" name="enableGlow" type="checkbox" checked>
-            <span>Speaking filter</span>
+          <div class="full toggle-row">
+            <label class="toggle">
+              <input id="enable-glow" name="enableGlow" type="checkbox" checked>
+              <span>Speaking filter</span>
           </label>
 
           <label class="toggle">
             <input id="enable-bobbing" name="enableBobbing" type="checkbox" checked>
-            <span>Speaking bobbing</span>
-          </label>
-        </div>
-      </form>
-    </section>
+              <span>Speaking bobbing</span>
+            </label>
+          </div>
 
-    <section class="panel users-panel">
-      <div class="panel-header users-header">
-        <p class="eyebrow">Users</p>
-        <button id="add-user" class="ghost" type="button">Add User</button>
-      </div>
-      <div id="user-list" class="user-list"></div>
+          <details class="full advanced-panel">
+            <summary>Advanced</summary>
+            <div class="advanced-grid">
+              <label>
+                <span>Container Selector</span>
+                <input id="container-selector" name="containerSelector" type="text" value=".voice_states" spellcheck="false">
+              </label>
+
+              <label>
+                <span>Speaking Class</span>
+                <input id="speaking-class" name="speakingClass" type="text" value="wrapper_speaking" spellcheck="false">
+              </label>
+
+              <label>
+                <span>Z Index Base</span>
+                <input id="z-index-base" name="zIndexBase" type="number" step="1" value="10">
+              </label>
+
+              <label>
+                <span>Resize Max Height (px)</span>
+                <input id="resize-max-height" name="resizeMaxHeight" type="number" min="1" step="1" value="384">
+              </label>
+
+              <label>
+                <span>Display Width (px)</span>
+                <input id="shared-display-width" name="sharedDisplayWidth" type="number" min="1" step="1" value="90">
+              </label>
+
+              <label>
+                <span>Display Height (px)</span>
+                <input id="shared-display-height" name="sharedDisplayHeight" type="number" min="1" step="1" value="160">
+              </label>
+
+              <label>
+                <span>Clip Left Top (%)</span>
+                <input id="clip-left-top" name="clipLeftTop" type="number" min="0" max="100" step="1" value="24">
+              </label>
+
+              <label>
+                <span>Clip Right Top (%)</span>
+                <input id="clip-right-top" name="clipRightTop" type="number" min="0" max="100" step="1" value="100">
+              </label>
+
+              <label>
+                <span>Clip Right Bottom (%)</span>
+                <input id="clip-right-bottom" name="clipRightBottom" type="number" min="0" max="100" step="1" value="76">
+              </label>
+
+              <label>
+                <span>Clip Left Bottom (%)</span>
+                <input id="clip-left-bottom" name="clipLeftBottom" type="number" min="0" max="100" step="1" value="0">
+              </label>
+
+              <label>
+                <span>Bobbing Distance (px)</span>
+                <input id="bob-distance" name="bobDistance" type="number" min="0" step="1" value="4">
+              </label>
+
+              <label>
+                <span>Bobbing Duration (s)</span>
+                <input id="bob-duration" name="bobDuration" type="number" min="0.1" step="0.1" value="0.6">
+              </label>
+            </div>
+          </details>
+        </form>
+      </section>
+
+      <section id="panel-users" class="tab-panel" role="tabpanel" aria-labelledby="tab-users" hidden>
+        <div class="panel-header users-header">
+          <p class="eyebrow">Users</p>
+          <button id="add-user" class="ghost" type="button">Add User</button>
+        </div>
+        <div id="user-tab-bar" class="user-tab-bar"></div>
+        <div id="user-list" class="user-list single-user"></div>
+      </section>
     </section>
 
     <section class="panel output">
@@ -150,7 +183,22 @@
     <article class="user-card">
       <div class="user-card-header">
         <strong class="user-card-title">User</strong>
-        <button class="danger remove-user" type="button">Remove</button>
+        <div class="user-card-actions">
+          <button class="ghost move-user-left" type="button">←</button>
+          <button class="ghost move-user-right" type="button">→</button>
+
+          <label class="toggle compact-toggle">
+            <input class="is-enabled" type="checkbox" checked>
+            <span>Include</span>
+          </label>
+
+          <label class="toggle compact-toggle">
+            <input class="is-speaking" type="checkbox">
+            <span>Preview speaking</span>
+          </label>
+
+          <button class="danger remove-user" type="button">Remove</button>
+        </div>
       </div>
 
       <div class="user-grid">
@@ -165,38 +213,8 @@
         </label>
 
         <label>
-          <span>Slot Number</span>
-          <input class="slot-number" type="number" min="1" step="1" value="1">
-        </label>
-
-        <label>
           <span>Top Offset (px)</span>
           <input class="top-offset" type="number" step="1" value="0">
-        </label>
-
-        <label>
-          <span>Display Width (px)</span>
-          <input class="display-width" type="number" min="1" step="1" value="54">
-        </label>
-
-        <label>
-          <span>Display Height (px)</span>
-          <input class="display-height" type="number" min="1" step="1" value="96">
-        </label>
-
-        <label>
-          <span>Padding Left (px)</span>
-          <input class="padding-left" type="number" min="0" step="1" value="60">
-        </label>
-
-        <label class="toggle">
-          <input class="is-enabled" type="checkbox" checked>
-          <span>Include</span>
-        </label>
-
-        <label class="toggle">
-          <input class="is-speaking" type="checkbox">
-          <span>Preview speaking</span>
         </label>
 
         <label class="full">
