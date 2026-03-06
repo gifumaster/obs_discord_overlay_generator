@@ -36,6 +36,32 @@ const SIZE_PRESETS = {
   xlarge: { displayWidth: 126, displayHeight: 224, slotSpacing: 144 }
 };
 
+const SAMPLE_IMAGE_DATA_URL = `data:image/svg+xml;utf8,${encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 160">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#24324f"/>
+      <stop offset="45%" stop-color="#1b2440"/>
+      <stop offset="100%" stop-color="#12192c"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#9bd6ff" stop-opacity="0.7"/>
+      <stop offset="50%" stop-color="#6f8fff" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#7bffe0" stop-opacity="0.18"/>
+    </linearGradient>
+    <linearGradient id="stripe" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.32"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="90" height="160" rx="14" fill="url(#bg)"/>
+  <rect x="10" y="10" width="70" height="140" rx="12" fill="url(#accent)" opacity="0.6"/>
+  <path d="M18 16h34l-20 128H18z" fill="url(#stripe)" opacity="0.55"/>
+  <path d="M48 10h22L42 150H20z" fill="#ffffff" opacity="0.08"/>
+  <path d="M66 10h10L54 150H44z" fill="#9bd6ff" opacity="0.14"/>
+</svg>
+`)}`;
+
 let nextUserNumber = 1;
 let usersState = [];
 let activeUserId = null;
@@ -179,7 +205,7 @@ function buildSpeakingBlock(sharedSettings) {
 
 function buildUserCss(sharedSettings, user) {
   const userId = sanitizeSelectorValue(user.userId, "USER_ID_HERE");
-  const dataUrl = user.dataUrl || "data:image/png;base64,PASTE_IMAGE_HERE";
+  const dataUrl = user.dataUrl || SAMPLE_IMAGE_DATA_URL;
   const nameGap = 6;
   const nameHeight = 26;
   const nameInset = 4;
@@ -402,7 +428,7 @@ function renderPreview() {
     avatar.className = "preview-avatar";
     avatar.style.width = `${sharedSettings.sharedDisplayWidth}px`;
     avatar.style.height = `${sharedSettings.sharedDisplayHeight}px`;
-    avatar.style.backgroundImage = user.dataUrl ? `url("${user.dataUrl}")` : "none";
+    avatar.style.backgroundImage = `url("${user.dataUrl || SAMPLE_IMAGE_DATA_URL}")`;
     avatar.style.clipPath = clipPath;
 
     if (!sharedSettings.enableGlow) {
