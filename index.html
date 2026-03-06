@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OBS Voice CSS Generator</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <section class="panel controls">
+      <div class="panel-header">
+        <p class="eyebrow">OBS Custom CSS</p>
+        <h1>Generator</h1>
+      </div>
+
+      <form id="shared-form" class="form-grid">
+        <label>
+          <span>Container Selector</span>
+          <input id="container-selector" name="containerSelector" type="text" value=".voice_states" spellcheck="false">
+        </label>
+
+        <label>
+          <span>Speaking Class</span>
+          <input id="speaking-class" name="speakingClass" type="text" value="wrapper_speaking" spellcheck="false">
+        </label>
+
+        <label>
+          <span>Slot Spacing (px)</span>
+          <input id="slot-spacing" name="slotSpacing" type="number" min="0" step="1" value="78">
+        </label>
+
+        <label>
+          <span>Overlap (px)</span>
+          <input id="overlap" name="overlap" type="number" min="0" step="1" value="30">
+        </label>
+
+        <label>
+          <span>Z Index Base</span>
+          <input id="z-index-base" name="zIndexBase" type="number" step="1" value="10">
+        </label>
+
+        <label>
+          <span>Min Height (px)</span>
+          <input id="min-height" name="minHeight" type="number" min="1" step="1" value="96">
+        </label>
+
+        <label>
+          <span>Clip Preset</span>
+          <select id="clip-preset" name="clipPreset">
+            <option value="light">Light</option>
+            <option value="medium" selected>Medium</option>
+            <option value="strong">Strong</option>
+            <option value="extreme">Extreme</option>
+            <option value="custom">Custom</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Resize Max Width (px)</span>
+          <input id="resize-max-width" name="resizeMaxWidth" type="number" min="1" step="1" value="216">
+        </label>
+
+        <label>
+          <span>Resize Max Height (px)</span>
+          <input id="resize-max-height" name="resizeMaxHeight" type="number" min="1" step="1" value="384">
+        </label>
+
+        <label>
+          <span>Clip Left Top (%)</span>
+          <input id="clip-left-top" name="clipLeftTop" type="number" min="0" max="100" step="1" value="24">
+        </label>
+
+        <label>
+          <span>Clip Right Top (%)</span>
+          <input id="clip-right-top" name="clipRightTop" type="number" min="0" max="100" step="1" value="100">
+        </label>
+
+        <label>
+          <span>Clip Right Bottom (%)</span>
+          <input id="clip-right-bottom" name="clipRightBottom" type="number" min="0" max="100" step="1" value="76">
+        </label>
+
+        <label>
+          <span>Clip Left Bottom (%)</span>
+          <input id="clip-left-bottom" name="clipLeftBottom" type="number" min="0" max="100" step="1" value="0">
+        </label>
+
+        <label>
+          <span>Bobbing Distance (px)</span>
+          <input id="bob-distance" name="bobDistance" type="number" min="0" step="1" value="4">
+        </label>
+
+        <label>
+          <span>Bobbing Duration (s)</span>
+          <input id="bob-duration" name="bobDuration" type="number" min="0.1" step="0.1" value="0.6">
+        </label>
+
+        <div class="full toggle-row">
+          <label class="toggle">
+            <input id="enable-glow" name="enableGlow" type="checkbox" checked>
+            <span>Speaking filter</span>
+          </label>
+
+          <label class="toggle">
+            <input id="enable-bobbing" name="enableBobbing" type="checkbox" checked>
+            <span>Speaking bobbing</span>
+          </label>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel users-panel">
+      <div class="panel-header users-header">
+        <p class="eyebrow">Users</p>
+        <button id="add-user" class="ghost" type="button">Add User</button>
+      </div>
+      <div id="user-list" class="user-list"></div>
+    </section>
+
+    <section class="panel output">
+      <div class="panel-header output-header">
+        <p class="eyebrow">Generated CSS</p>
+        <h2>Paste Into OBS</h2>
+      </div>
+      <div class="output-actions">
+        <label class="ghost file-action">
+          <span>Load JSON</span>
+          <input id="load-json" type="file" accept="application/json">
+        </label>
+        <button id="save-json" class="ghost" type="button">Save JSON</button>
+        <button id="copy-css" class="ghost primary" type="button">Copy CSS</button>
+      </div>
+      <textarea id="css-output" class="css-output" rows="24" readonly></textarea>
+      <p id="copy-status" class="copy-status" aria-live="polite"></p>
+    </section>
+
+    <section class="panel preview-panel">
+      <div class="panel-header">
+        <p class="eyebrow">Preview</p>
+        <h2>Live Stack</h2>
+      </div>
+      <div class="preview-stage">
+        <div id="preview-canvas" class="preview-canvas"></div>
+      </div>
+    </section>
+  </main>
+
+  <template id="user-row-template">
+    <article class="user-card">
+      <div class="user-card-header">
+        <strong class="user-card-title">User</strong>
+        <button class="danger remove-user" type="button">Remove</button>
+      </div>
+
+      <div class="user-grid">
+        <label>
+          <span>Row Label</span>
+          <input class="user-label" type="text" value="User 1" spellcheck="false">
+        </label>
+
+        <label>
+          <span>User ID</span>
+          <input class="user-id" type="text" placeholder="123456789012345678" spellcheck="false">
+        </label>
+
+        <label>
+          <span>Slot Number</span>
+          <input class="slot-number" type="number" min="1" step="1" value="1">
+        </label>
+
+        <label>
+          <span>Top Offset (px)</span>
+          <input class="top-offset" type="number" step="1" value="0">
+        </label>
+
+        <label>
+          <span>Display Width (px)</span>
+          <input class="display-width" type="number" min="1" step="1" value="54">
+        </label>
+
+        <label>
+          <span>Display Height (px)</span>
+          <input class="display-height" type="number" min="1" step="1" value="96">
+        </label>
+
+        <label>
+          <span>Padding Left (px)</span>
+          <input class="padding-left" type="number" min="0" step="1" value="60">
+        </label>
+
+        <label class="toggle">
+          <input class="is-enabled" type="checkbox" checked>
+          <span>Include</span>
+        </label>
+
+        <label class="toggle">
+          <input class="is-speaking" type="checkbox">
+          <span>Preview speaking</span>
+        </label>
+
+        <label class="full">
+          <span>Data URL</span>
+          <textarea class="data-url" rows="4" placeholder="data:image/png;base64,..."></textarea>
+        </label>
+
+        <div class="full file-row">
+          <label class="file-picker">
+            <span>Load Image File</span>
+            <input class="image-file" type="file" accept="image/*">
+          </label>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <script src="./app.js"></script>
+</body>
+</html>

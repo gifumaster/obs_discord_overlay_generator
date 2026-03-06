@@ -1,0 +1,366 @@
+:root {
+  --panel: rgba(10, 15, 25, 0.84);
+  --panel-border: rgba(185, 212, 255, 0.12);
+  --panel-shadow: 0 20px 45px rgba(0, 0, 0, 0.32);
+  --text: #eef4ff;
+  --muted: #9db0d2;
+  --accent: #8ad4ff;
+  --accent-strong: #d7f4ff;
+  --field: rgba(255, 255, 255, 0.06);
+  --field-border: rgba(255, 255, 255, 0.12);
+  --danger: #ff8c9c;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--text);
+  font-family: "Segoe UI", "Hiragino Sans", sans-serif;
+  background:
+    radial-gradient(circle at top, rgba(102, 190, 255, 0.18), transparent 28%),
+    linear-gradient(150deg, #08101b 0%, #0f1726 45%, #11192b 100%);
+}
+
+textarea,
+input,
+button,
+select {
+  font: inherit;
+}
+
+.app-shell {
+  width: min(1400px, calc(100vw - 32px));
+  margin: 24px auto;
+  display: grid;
+  grid-template-columns: minmax(300px, 360px) minmax(320px, 560px) minmax(300px, 360px);
+  grid-template-areas:
+    "preview preview preview"
+    "controls users output";
+  gap: 20px;
+  align-items: start;
+}
+
+.controls {
+  grid-area: controls;
+}
+
+.users-panel {
+  grid-area: users;
+}
+
+.preview-panel {
+  grid-area: preview;
+}
+
+.output {
+  grid-area: output;
+}
+
+.panel {
+  padding: 22px;
+  border: 1px solid var(--panel-border);
+  border-radius: 24px;
+  background: var(--panel);
+  backdrop-filter: blur(18px);
+  box-shadow: var(--panel-shadow);
+}
+
+.panel-header h1,
+.panel-header h2,
+.panel-header p {
+  margin: 0;
+}
+
+.eyebrow {
+  margin-bottom: 8px;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+}
+
+.panel-header h1,
+.panel-header h2 {
+  font-size: clamp(1.45rem, 2vw, 1.9rem);
+}
+
+.intro {
+  margin-top: 10px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.form-grid,
+.user-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.form-grid {
+  margin-top: 20px;
+}
+
+.form-grid label,
+.file-picker,
+.user-grid label {
+  display: grid;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.form-grid label > span:first-child,
+.file-picker > span,
+.user-grid label > span:first-child {
+  color: var(--accent-strong);
+}
+
+.full {
+  grid-column: 1 / -1;
+}
+
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--field-border);
+  border-radius: 14px;
+  background: var(--field);
+  color: var(--text);
+}
+
+textarea {
+  resize: vertical;
+}
+
+select option {
+  color: #0b1220;
+  background: #f3f7ff;
+}
+
+.ghost,
+.danger {
+  padding: 12px 16px;
+  border-radius: 14px;
+  color: var(--text);
+  cursor: pointer;
+  min-height: 46px;
+}
+
+.ghost {
+  border: 1px solid rgba(138, 212, 255, 0.25);
+  background: rgba(138, 212, 255, 0.12);
+}
+
+.ghost.primary {
+  border-color: rgba(138, 212, 255, 0.45);
+  background: linear-gradient(180deg, rgba(138, 212, 255, 0.34), rgba(78, 169, 255, 0.26));
+  box-shadow: 0 10px 24px rgba(67, 146, 255, 0.16);
+}
+
+.file-action {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.file-action input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.danger {
+  border: 1px solid rgba(255, 140, 156, 0.28);
+  background: rgba(255, 140, 156, 0.12);
+  color: #ffe5ea;
+}
+
+.form-grid label.toggle,
+.user-grid label.toggle,
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--accent-strong);
+  white-space: nowrap;
+}
+
+.toggle input {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.users-header,
+.output-actions,
+.user-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.user-list {
+  margin-top: 18px;
+  display: grid;
+  gap: 14px;
+}
+
+.user-card {
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.user-card-title {
+  font-size: 1rem;
+}
+
+.user-grid {
+  margin-top: 14px;
+}
+
+.file-row {
+  display: flex;
+  gap: 12px;
+  align-items: end;
+}
+
+.file-picker {
+  flex: 1;
+}
+
+.file-picker input {
+  padding: 10px 0;
+}
+
+.output-actions {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.preview-stage {
+  margin-top: 18px;
+  min-height: 220px;
+  padding: 20px;
+  border-radius: 20px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0)),
+    rgba(5, 9, 14, 0.65);
+  overflow: auto;
+}
+
+.preview-canvas {
+  position: relative;
+  min-height: 280px;
+  min-width: 100%;
+}
+
+.preview-card {
+  position: absolute;
+  overflow: visible;
+}
+
+.preview-avatar {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  transition: filter 0.15s ease;
+}
+
+.preview-card.is-speaking .preview-avatar {
+  filter: brightness(1.34) saturate(0.72) contrast(1.08);
+}
+
+.preview-card.is-speaking.is-bobbing .preview-avatar {
+  animation: previewBob 0.6s ease-in-out infinite;
+}
+
+@keyframes previewBob {
+  0% {
+    transform: translateY(-50%);
+  }
+  50% {
+    transform: translateY(calc(-50% - var(--preview-bob-distance, 4px)));
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
+.css-output {
+  margin-top: 14px;
+  min-height: 480px;
+  font-family: Consolas, "Courier New", monospace;
+  line-height: 1.45;
+}
+
+.copy-status {
+  min-height: 1.4em;
+  margin: 10px 0 0;
+  color: var(--accent);
+}
+
+@media (max-width: 1180px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "preview"
+      "controls"
+      "users"
+      "output";
+  }
+}
+
+@media (max-width: 640px) {
+  .app-shell {
+    width: min(100vw - 18px, 1400px);
+    margin: 9px auto;
+    gap: 14px;
+  }
+
+  .panel {
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .form-grid,
+  .user-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .file-row,
+  .users-header,
+  .output-actions,
+  .user-card-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
