@@ -150,6 +150,10 @@ function clampNumber(value, min, max, fallback) {
   return Math.min(max, Math.max(min, number));
 }
 
+function clampFrameCoordinate(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
 function applyClipPreset(presetName) {
   const preset = CLIP_PRESETS[presetName];
   if (!preset) {
@@ -281,11 +285,15 @@ function buildClipFrameDataUrl(sharedSettings) {
   const halfStroke = strokeWidth / 2;
   const width = Math.max(1, sharedSettings.sharedDisplayWidth);
   const height = Math.max(1, sharedSettings.sharedDisplayHeight);
+  const minX = halfStroke;
+  const maxX = Math.max(halfStroke, width - halfStroke);
+  const minY = halfStroke;
+  const maxY = Math.max(halfStroke, height - halfStroke);
   const points = [
-    `${(sharedSettings.clipLeftTop / 100) * width},${halfStroke}`,
-    `${(sharedSettings.clipRightTop / 100) * width},${halfStroke}`,
-    `${(sharedSettings.clipRightBottom / 100) * width},${height - halfStroke}`,
-    `${(sharedSettings.clipLeftBottom / 100) * width},${height - halfStroke}`
+    `${clampFrameCoordinate((sharedSettings.clipLeftTop / 100) * width, minX, maxX)},${minY}`,
+    `${clampFrameCoordinate((sharedSettings.clipRightTop / 100) * width, minX, maxX)},${minY}`,
+    `${clampFrameCoordinate((sharedSettings.clipRightBottom / 100) * width, minX, maxX)},${maxY}`,
+    `${clampFrameCoordinate((sharedSettings.clipLeftBottom / 100) * width, minX, maxX)},${maxY}`
   ].join(" ");
   if (strokeWidth === 0) {
     return `data:image/svg+xml;utf8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}"></svg>`)}`;
