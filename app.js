@@ -420,13 +420,13 @@ function buildCss() {
 
 @keyframes obsVoiceBob {
   0% {
-    transform: translateY(-50%);
+    transform: translateY(0);
   }
   50% {
-    transform: translateY(calc(-50% - ${sharedSettings.bobDistance}px));
+    transform: translateY(calc(0px - ${sharedSettings.bobDistance}px));
   }
   100% {
-    transform: translateY(-50%);
+    transform: translateY(0);
   }
 }` : "";
   const userCssBlocks = users.map((user) => buildUserCss({ ...sharedSettings, speakingClass }, user)).join("\n\n");
