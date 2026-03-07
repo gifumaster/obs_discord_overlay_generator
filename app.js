@@ -818,11 +818,13 @@ function renderPreview() {
     avatar.style.height = `${sharedSettings.sharedDisplayHeight}px`;
     avatar.style.backgroundImage = `url("${user.dataUrl || SAMPLE_IMAGE_DATA_URL}")`;
     avatar.style.clipPath = clipPath;
-    avatar.style.setProperty("--preview-speaking-filter", buildSpeakingFilterValue(sharedSettings.speakingFilterStrength));
-
-    if (!sharedSettings.enableGlow) {
-      avatar.style.filter = "none";
-    }
+    avatar.style.removeProperty("filter");
+    avatar.style.setProperty(
+      "--preview-speaking-filter",
+      sharedSettings.enableGlow
+        ? buildSpeakingFilterValue(sharedSettings.speakingFilterStrength)
+        : "brightness(0.86) saturate(0.92) contrast(1)"
+    );
     frame.style.width = `${sharedSettings.sharedDisplayWidth}px`;
     frame.style.height = `${sharedSettings.sharedDisplayHeight}px`;
     frame.style.backgroundImage = `url("${frameDataUrl}")`;
