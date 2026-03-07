@@ -190,6 +190,7 @@ function readSharedSettings() {
     speakingClass: document.querySelector("#speaking-class").value.trim() || "wrapper_speaking",
     slotSpacing: Math.max(0, Number(document.querySelector("#slot-spacing").value) || 78),
     overlap: Math.max(0, Number(document.querySelector("#overlap").value) || 30),
+    stackLeftPadding: Math.max(0, Number(document.querySelector("#stack-left-padding").value) || 18),
     zIndexBase: Number(document.querySelector("#z-index-base").value) || 10,
     minHeight: Math.max(1, Number(document.querySelector("#min-height").value) || 96),
     clipPreset: clipPresetField.value,
@@ -219,6 +220,7 @@ function setSharedSettings(sharedSettings) {
   document.querySelector("#speaking-class").value = sharedSettings.speakingClass || "wrapper_speaking";
   document.querySelector("#slot-spacing").value = String(sharedSettings.slotSpacing ?? 78);
   document.querySelector("#overlap").value = String(sharedSettings.overlap ?? 30);
+  document.querySelector("#stack-left-padding").value = String(sharedSettings.stackLeftPadding ?? 18);
   document.querySelector("#z-index-base").value = String(sharedSettings.zIndexBase ?? 10);
   document.querySelector("#min-height").value = String(sharedSettings.minHeight ?? 96);
   document.querySelector("#resize-max-width").value = String(sharedSettings.resizeMaxWidth ?? 216);
@@ -327,7 +329,7 @@ function buildUserCss(sharedSettings, user) {
     `polygon(${sharedSettings.clipLeftTop}% 0, ${sharedSettings.clipRightTop}% 0, ` +
     `${sharedSettings.clipRightBottom}% 100%, ${sharedSettings.clipLeftBottom}% 100%)`;
   const slotStep = Math.max(0, sharedSettings.slotSpacing - sharedSettings.overlap);
-  const slotLeft = (user.slotNumber - 1) * slotStep;
+  const slotLeft = sharedSettings.stackLeftPadding + ((user.slotNumber - 1) * slotStep);
   const itemZIndex = sharedSettings.zIndexBase + user.slotNumber;
   const nameWidth = Math.max(36, Math.min(displayWidth - nameInset, slotStep || displayWidth) - nameInset);
 
@@ -534,7 +536,7 @@ function renderPreview() {
   const minTop = users.reduce((currentMin, user) => Math.min(currentMin, user.topOffset), 0);
 
   const width = users.reduce((currentMax, user) => {
-    const left = (user.slotNumber - 1) * slotStep;
+    const left = sharedSettings.stackLeftPadding + ((user.slotNumber - 1) * slotStep);
     return Math.max(currentMax, left + sharedSettings.sharedDisplayWidth + 40);
   }, 280);
   const height = users.reduce((currentMax, user) => {
@@ -546,7 +548,7 @@ function renderPreview() {
   previewCanvas.style.height = `${height}px`;
 
   users.forEach((user) => {
-    const left = (user.slotNumber - 1) * slotStep;
+    const left = sharedSettings.stackLeftPadding + ((user.slotNumber - 1) * slotStep);
     const nameWidth = Math.max(
       36,
       Math.min(sharedSettings.sharedDisplayWidth - nameInset, slotStep || sharedSettings.sharedDisplayWidth) - nameInset
