@@ -4,17 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OBS Voice CSS Generator</title>
-  <link rel="stylesheet" href="./styles.css?v=20260307-17">
+  <link rel="stylesheet" href="./styles.css?v=20260307-19">
 </head>
 <body>
   <main class="app-shell">
     <section class="panel settings-panel">
       <div class="panel-header">
         <p class="eyebrow">OBS Custom CSS</p>
-        <h1>Generator</h1>
       </div>
       <div class="tab-bar" role="tablist" aria-label="Settings tabs">
-        <button id="tab-shared" class="tab-button is-active" type="button" role="tab" aria-selected="true" aria-controls="panel-shared">Shared</button>
+        <button id="tab-shared" class="tab-button is-active" type="button" role="tab" aria-selected="true" aria-controls="panel-shared">Common Settings</button>
         <button id="tab-users" class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="panel-users">Users</button>
       </div>
 
@@ -189,7 +188,6 @@
     <section class="panel output">
       <div class="panel-header output-header">
         <p class="eyebrow">Generated CSS</p>
-        <h2>Paste Into OBS</h2>
       </div>
       <div class="output-actions">
         <label class="ghost file-action">
@@ -206,7 +204,6 @@
     <section class="panel preview-panel">
       <div class="panel-header">
         <p class="eyebrow">Preview</p>
-        <h2>Live Stack</h2>
       </div>
       <div class="preview-stage">
         <div id="preview-canvas" class="preview-canvas"></div>
@@ -227,7 +224,7 @@
     </div>
   </div>
 
-  <div class="app-meta app-meta-left" aria-label="Version">v20260307-17</div>
+  <div class="app-meta app-meta-left" aria-label="Version">v20260307-19</div>
   <a
     class="app-meta app-meta-right"
     href="https://streamkit.discord.com/overlay"
@@ -282,7 +279,7 @@
 
         <div class="full file-row">
           <label class="file-picker">
-            <span>Load Image File</span>
+            <span>Load Image File / Paste Image</span>
             <input class="image-file" type="file" accept="image/*">
           </label>
         </div>
@@ -290,6 +287,6 @@
     </article>
   </template>
 
-  <script src="./app.js?v=20260307-17"></script>
+  <script src="./app.js?v=20260307-19"></script>
 </body>
 </html>

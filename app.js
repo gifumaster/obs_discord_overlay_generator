@@ -777,23 +777,31 @@ function createUserRow(initialValues = {}) {
       return;
     }
 
-    const sharedSettings = readSharedSettings();
-
     try {
-      dataUrlField.value = await resizeImageToDataUrl(
-        file,
-        sharedSettings.resizeMaxWidth,
-        sharedSettings.resizeMaxHeight,
-        "image/png"
-      );
-      const targetUser = usersState.find((entry) => entry.internalId === user.internalId);
-      if (targetUser) {
-        targetUser.dataUrl = dataUrlField.value;
-      }
-      setStatus("");
-      updateOutput();
+      await applyUserImageFile(user.internalId, dataUrlField, file);
     } catch (error) {
       setStatus("Image resize failed. Try a different file.", "error", true);
+    } finally {
+      fileField.value = "";
+    }
+  });
+
+  card.addEventListener("paste", async (event) => {
+    const items = Array.from(event.clipboardData?.items || []);
+    const imageItem = items.find((item) => item.type.startsWith("image/"));
+    const file = imageItem?.getAsFile();
+
+    if (!file) {
+      return;
+    }
+
+    event.preventDefault();
+
+    try {
+      await applyUserImageFile(user.internalId, dataUrlField, file);
+      setStatus("Pasted image from clipboard.");
+    } catch (error) {
+      setStatus("Clipboard image paste failed.", "error", true);
     }
   });
 
@@ -942,6 +950,30 @@ function resizeImageToDataUrl(file, maxWidth, maxHeight, mimeType = "image/png",
     reader.onerror = () => reject(new Error("Failed to read file."));
     reader.readAsDataURL(file);
   });
+}
+
+async function applyUserImageFile(userInternalId, dataUrlField, file) {
+  if (!file || !file.type.startsWith("image/")) {
+    return false;
+  }
+
+  const sharedSettings = readSharedSettings();
+  const resizedDataUrl = await resizeImageToDataUrl(
+    file,
+    sharedSettings.resizeMaxWidth,
+    sharedSettings.resizeMaxHeight,
+    "image/png"
+  );
+
+  dataUrlField.value = resizedDataUrl;
+  const targetUser = usersState.find((entry) => entry.internalId === userInternalId);
+  if (targetUser) {
+    targetUser.dataUrl = resizedDataUrl;
+  }
+
+  setStatus("");
+  updateOutput();
+  return true;
 }
 
 sharedForm.addEventListener("input", (event) => {
