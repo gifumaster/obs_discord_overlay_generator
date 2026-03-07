@@ -81,6 +81,9 @@ let usersState = [];
 let activeUserId = null;
 let statusTimeoutId = null;
 let localDraftSaveTimeoutId = null;
+let outputFrameRequestId = 0;
+const userTabElements = new Map();
+const previewCardElements = new Map();
 
 function setStatus(message = "", type = "info", persist = false) {
   if (statusTimeoutId) {
@@ -266,7 +269,7 @@ function initializeDefaultState() {
   createUserRow({ label: "ユーザー 1", userId: "123456789012345678" });
   setActiveTab("shared");
   setStatus("");
-  updateOutput();
+  updateOutput({ immediate: true });
 }
 
 function applyClipPreset(presetName) {
@@ -595,10 +598,120 @@ function detectSharedSizePreset() {
   sharedSizePresetField.value = matchedPreset ? matchedPreset[0] : "custom";
 }
 
-function updateOutput() {
+function flushOutputUpdate() {
+  outputFrameRequestId = 0;
   output.value = buildCss();
   renderPreview();
   scheduleLocalDraftSave();
+}
+
+function updateOutput({ immediate = false } = {}) {
+  if (immediate) {
+    if (outputFrameRequestId) {
+      cancelAnimationFrame(outputFrameRequestId);
+      outputFrameRequestId = 0;
+    }
+    flushOutputUpdate();
+    return;
+  }
+
+  if (outputFrameRequestId) {
+    return;
+  }
+
+  outputFrameRequestId = requestAnimationFrame(() => {
+    flushOutputUpdate();
+  });
+}
+
+function getOrCreateUserTabElements(user) {
+  const existing = userTabElements.get(user.internalId);
+  if (existing) {
+    return existing;
+  }
+
+  const button = document.createElement("button");
+  const toggle = document.createElement("label");
+  const toggleInput = document.createElement("input");
+  const toggleText = document.createElement("span");
+
+  button.type = "button";
+  button.className = "user-tab-button";
+  button.setAttribute("role", "tab");
+  button.id = `user-tab-${user.internalId}`;
+  button.setAttribute("aria-controls", `user-panel-${user.internalId}`);
+  button.addEventListener("click", () => {
+    activeUserId = user.internalId;
+    renderUserTabs();
+    renderActiveUserEditor();
+  });
+  button.addEventListener("keydown", (event) => {
+    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") {
+      return;
+    }
+
+    event.preventDefault();
+    const index = usersState.findIndex((entry) => entry.internalId === user.internalId);
+    if (index === -1) {
+      return;
+    }
+
+    const direction = event.key === "ArrowRight" ? 1 : -1;
+    const nextIndex = (index + direction + usersState.length) % usersState.length;
+    activeUserId = usersState[nextIndex].internalId;
+    renderUserTabs();
+    renderActiveUserEditor();
+    userTabBar.querySelector(".user-tab-button.is-active")?.focus();
+  });
+
+  toggle.className = "user-tab-toggle";
+  toggleInput.type = "checkbox";
+  toggleInput.setAttribute("aria-label", "表示する");
+  toggleInput.addEventListener("click", (event) => {
+    event.stopPropagation();
+  });
+  toggleInput.addEventListener("change", () => {
+    const targetUser = usersState.find((entry) => entry.internalId === user.internalId);
+    if (!targetUser) {
+      return;
+    }
+
+    targetUser.enabled = toggleInput.checked;
+    targetUser.editorCard?.classList.toggle("is-disabled", !targetUser.enabled);
+    setStatus("");
+    renderUserTabs();
+    updateOutput();
+  });
+
+  toggle.append(toggleInput, toggleText);
+  button.append(toggle);
+
+  const created = { button, toggleInput, toggleText };
+  userTabElements.set(user.internalId, created);
+  return created;
+}
+
+function getOrCreatePreviewCardElements(user) {
+  const existing = previewCardElements.get(user.internalId);
+  if (existing) {
+    return existing;
+  }
+
+  const card = document.createElement("div");
+  const avatar = document.createElement("div");
+  const frame = document.createElement("div");
+  const label = document.createElement("div");
+
+  card.className = "preview-card";
+  avatar.className = "preview-avatar";
+  frame.className = "preview-frame";
+  label.className = "preview-label";
+
+  card.append(avatar, frame, label);
+
+  const created = { card, avatar, frame, label };
+  previewCardElements.set(user.internalId, created);
+  return created;
 }
 
 function exportState() {
@@ -626,14 +739,23 @@ function importState(state) {
   activeUserId = usersState[0]?.internalId || null;
   renderUserTabs();
   renderActiveUserEditor();
-  updateOutput();
+  updateOutput({ immediate: true });
 }
 
 function renderPreview() {
   const sharedSettings = readSharedSettings();
-  const users = readUserRows()
+  const users = usersState
     .filter((user) => user.enabled)
-    .map((user, index) => ({ ...user, slotNumber: index + 1 }));
+    .map((user, index) => ({
+      internalId: user.internalId,
+      label: user.label,
+      userId: user.userId,
+      topOffset: user.topOffset,
+      enabled: user.enabled,
+      speaking: user.speaking,
+      dataUrl: user.dataUrl,
+      slotNumber: index + 1
+    }));
   const clipPath =
     `polygon(${sharedSettings.clipLeftTop}% 0, ${sharedSettings.clipRightTop}% 0, ` +
     `${sharedSettings.clipRightBottom}% 100%, ${sharedSettings.clipLeftBottom}% 100%)`;
@@ -642,8 +764,15 @@ function renderPreview() {
   const nameGap = 6;
   const labelHeight = 26;
   const nameInset = 4;
-  previewCanvas.innerHTML = "";
   previewEmptyState.hidden = users.length > 0;
+
+  const liveIds = new Set(users.map((user) => user.internalId));
+  previewCardElements.forEach((elements, internalId) => {
+    if (!liveIds.has(internalId)) {
+      elements.card.remove();
+      previewCardElements.delete(internalId);
+    }
+  });
 
   if (users.length === 0) {
     previewCanvas.style.width = "100%";
@@ -664,6 +793,7 @@ function renderPreview() {
 
   previewCanvas.style.width = `${width}px`;
   previewCanvas.style.height = `${height}px`;
+  const fragment = document.createDocumentFragment();
 
   users.forEach((user) => {
     const left = sharedSettings.stackLeftPadding + ((user.slotNumber - 1) * slotStep);
@@ -671,17 +801,10 @@ function renderPreview() {
       36,
       Math.min(sharedSettings.sharedDisplayWidth - nameInset, slotStep || sharedSettings.sharedDisplayWidth) - nameInset
     );
-    const card = document.createElement("div");
-    const avatar = document.createElement("div");
-    const frame = document.createElement("div");
+    const { card, avatar, frame, label } = getOrCreatePreviewCardElements(user);
 
-    card.className = "preview-card";
-    if (user.speaking) {
-      card.classList.add("is-speaking");
-    }
-    if (user.speaking && sharedSettings.enableBobbing) {
-      card.classList.add("is-bobbing");
-    }
+    card.classList.toggle("is-speaking", user.speaking);
+    card.classList.toggle("is-bobbing", user.speaking && sharedSettings.enableBobbing);
 
     card.style.left = `${left}px`;
     card.style.top = `${user.topOffset - minTop}px`;
@@ -691,7 +814,6 @@ function renderPreview() {
     card.style.setProperty("--preview-bob-distance", `${sharedSettings.bobDistance}px`);
     card.style.setProperty("--preview-bob-duration", `${sharedSettings.bobDuration}s`);
 
-    avatar.className = "preview-avatar";
     avatar.style.width = `${sharedSettings.sharedDisplayWidth}px`;
     avatar.style.height = `${sharedSettings.sharedDisplayHeight}px`;
     avatar.style.backgroundImage = `url("${user.dataUrl || SAMPLE_IMAGE_DATA_URL}")`;
@@ -701,10 +823,6 @@ function renderPreview() {
     if (!sharedSettings.enableGlow) {
       avatar.style.filter = "none";
     }
-
-    card.append(avatar);
-
-    frame.className = "preview-frame";
     frame.style.width = `${sharedSettings.sharedDisplayWidth}px`;
     frame.style.height = `${sharedSettings.sharedDisplayHeight}px`;
     frame.style.backgroundImage = `url("${frameDataUrl}")`;
@@ -714,19 +832,15 @@ function renderPreview() {
     frame.style.setProperty("--preview-frame-glow-radius-near", `${Math.max(1, Math.round(3 * clampNumber(sharedSettings.frameGlowStrength, 0.2, 3, 1)))}px`);
     frame.style.setProperty("--preview-frame-glow-radius-mid", `${Math.max(2, Math.round(8 * clampNumber(sharedSettings.frameGlowStrength, 0.2, 3, 1)))}px`);
     frame.style.setProperty("--preview-frame-glow-radius-far", `${Math.max(4, Math.round(18 * clampNumber(sharedSettings.frameGlowStrength, 0.2, 3, 1)))}px`);
-    card.append(frame);
-
-    const label = document.createElement("div");
-    label.className = "preview-label";
     label.textContent = user.label || user.userId || "ユーザー";
     label.style.top = `${sharedSettings.sharedDisplayHeight + nameGap}px`;
     label.style.left = `${nameInset}px`;
     label.style.width = `${nameWidth}px`;
     label.style.maxWidth = `${nameWidth}px`;
-    card.append(label);
-
-    previewCanvas.append(card);
+    fragment.append(card);
   });
+
+  previewCanvas.replaceChildren(fragment);
 }
 
 function createUserRow(initialValues = {}) {
@@ -863,65 +977,34 @@ function createUserRow(initialValues = {}) {
 }
 
 function renderUserTabs() {
-  userTabBar.innerHTML = "";
   userEmptyState.hidden = usersState.length > 0;
+  const liveIds = new Set(usersState.map((user) => user.internalId));
+
+  userTabElements.forEach((elements, internalId) => {
+    if (!liveIds.has(internalId)) {
+      elements.button.remove();
+      userTabElements.delete(internalId);
+    }
+  });
+
+  const fragment = document.createDocumentFragment();
 
   usersState.forEach((user, index) => {
-    const button = document.createElement("button");
-    const toggle = document.createElement("label");
-    const toggleInput = document.createElement("input");
-    const toggleText = document.createElement("span");
-    button.type = "button";
-    button.className = "user-tab-button";
-    button.setAttribute("role", "tab");
-    button.id = `user-tab-${user.internalId}`;
-    button.setAttribute("aria-controls", `user-panel-${user.internalId}`);
+    const { button, toggleInput, toggleText } = getOrCreateUserTabElements(user);
     const isActive = user.internalId === activeUserId;
-    if (user.internalId === activeUserId) {
-      button.classList.add("is-active");
-    }
+
+    button.classList.toggle("is-active", isActive);
     button.classList.toggle("is-disabled-user", !user.enabled);
     button.setAttribute("aria-selected", String(isActive));
     button.tabIndex = isActive ? 0 : -1;
-    button.addEventListener("click", () => {
-      activeUserId = user.internalId;
-      renderUserTabs();
-      renderActiveUserEditor();
-    });
-    button.addEventListener("keydown", (event) => {
-      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") {
-        return;
-      }
 
-      event.preventDefault();
-      const direction = event.key === "ArrowRight" ? 1 : -1;
-      const nextIndex = (index + direction + usersState.length) % usersState.length;
-      activeUserId = usersState[nextIndex].internalId;
-      renderUserTabs();
-      renderActiveUserEditor();
-      userTabBar.querySelector(".user-tab-button.is-active")?.focus();
-    });
-
-    toggle.className = "user-tab-toggle";
-    toggleInput.type = "checkbox";
     toggleInput.checked = user.enabled;
-    toggleInput.setAttribute("aria-label", "表示する");
-    toggleInput.addEventListener("click", (event) => {
-      event.stopPropagation();
-    });
-    toggleInput.addEventListener("change", () => {
-      user.enabled = toggleInput.checked;
-      user.editorCard?.classList.toggle("is-disabled", !user.enabled);
-      setStatus("");
-      renderUserTabs();
-      updateOutput();
-    });
-    toggleText.textContent = user.label || user.userId || `ユーザー ${usersState.indexOf(user) + 1}`;
-    toggle.append(toggleInput, toggleText);
+    toggleText.textContent = user.label || user.userId || `ユーザー ${index + 1}`;
 
-    button.append(toggle);
-    userTabBar.append(button);
+    fragment.append(button);
   });
+
+  userTabBar.replaceChildren(fragment);
 }
 
 function renderActiveUserEditor() {
@@ -1103,6 +1186,7 @@ loadJsonField.addEventListener("change", async (event) => {
 
 copyButton.addEventListener("click", async () => {
   try {
+    updateOutput({ immediate: true });
     await navigator.clipboard.writeText(output.value);
     setStatus("CSSをクリップボードにコピーしました。");
   } catch (error) {
