@@ -7,6 +7,10 @@ const loadJsonField = document.querySelector("#load-json");
 const copyButton = document.querySelector("#copy-css");
 const copyStatus = document.querySelector("#copy-status");
 const output = document.querySelector("#css-output");
+const resumeModal = document.querySelector("#resume-modal");
+const resumeDescription = document.querySelector("#resume-description");
+const resumePreviousButton = document.querySelector("#resume-previous");
+const resumeNewButton = document.querySelector("#resume-new");
 const previewCanvas = document.querySelector("#preview-canvas");
 const previewEmptyState = document.querySelector("#preview-empty-state");
 const userTabBar = document.querySelector("#user-tab-bar");
@@ -68,11 +72,14 @@ const SAMPLE_IMAGE_DATA_URL = `data:image/svg+xml;utf8,${encodeURIComponent(`
   <path d="M66 10h10L54 150H44z" fill="#9bd6ff" opacity="0.14"/>
 </svg>
 `)}`;
+const LOCAL_DRAFT_KEY = "obs-discord-overlay-generator:last-state";
+const LOCAL_DRAFT_VERSION = 1;
 
 let nextUserNumber = 1;
 let usersState = [];
 let activeUserId = null;
 let statusTimeoutId = null;
+let localDraftSaveTimeoutId = null;
 
 function setStatus(message = "", type = "info", persist = false) {
   if (statusTimeoutId) {
@@ -152,6 +159,101 @@ function clampNumber(value, min, max, fallback) {
 
 function clampFrameCoordinate(value, min, max) {
   return Math.min(max, Math.max(min, value));
+}
+
+function scheduleLocalDraftSave() {
+  if (localDraftSaveTimeoutId) {
+    clearTimeout(localDraftSaveTimeoutId);
+  }
+
+  localDraftSaveTimeoutId = window.setTimeout(() => {
+    localDraftSaveTimeoutId = null;
+
+    try {
+      localStorage.setItem(
+        LOCAL_DRAFT_KEY,
+        JSON.stringify({
+          version: LOCAL_DRAFT_VERSION,
+          savedAt: new Date().toISOString(),
+          state: exportState()
+        })
+      );
+    } catch (error) {
+      // Ignore quota/storage failures and keep the editor usable.
+    }
+  }, 180);
+}
+
+function clearLocalDraft() {
+  try {
+    localStorage.removeItem(LOCAL_DRAFT_KEY);
+  } catch (error) {
+    // Ignore storage failures.
+  }
+}
+
+function readLocalDraft() {
+  try {
+    const raw = localStorage.getItem(LOCAL_DRAFT_KEY);
+    if (!raw) {
+      return null;
+    }
+
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object" || !parsed.state || typeof parsed.state !== "object") {
+      return null;
+    }
+
+    const hasShared = parsed.state.shared && typeof parsed.state.shared === "object";
+    const hasUsers = Array.isArray(parsed.state.users) && parsed.state.users.length > 0;
+
+    if (!hasShared || !hasUsers) {
+      return null;
+    }
+
+    return parsed;
+  } catch (error) {
+    return null;
+  }
+}
+
+function formatSavedAt(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit"
+  }).format(date);
+}
+
+function closeResumeModal() {
+  resumeModal.hidden = true;
+}
+
+function showResumeModal(draft) {
+  const savedAtLabel = formatSavedAt(draft.savedAt);
+  resumeDescription.textContent = savedAtLabel
+    ? `A locally saved draft from ${savedAtLabel} is available.`
+    : "A locally saved draft is available from your last visit.";
+  resumeModal.hidden = false;
+}
+
+function initializeDefaultState() {
+  usersState = [];
+  activeUserId = null;
+  nextUserNumber = 1;
+  applyClipPreset("medium");
+  applySharedSizePreset("medium");
+  createUserRow({ label: "User 1", userId: "123456789012345678" });
+  setActiveTab("shared");
+  setStatus("");
+  updateOutput();
 }
 
 function applyClipPreset(presetName) {
@@ -481,6 +583,7 @@ function detectSharedSizePreset() {
 function updateOutput() {
   output.value = buildCss();
   renderPreview();
+  scheduleLocalDraftSave();
 }
 
 function exportState() {
@@ -941,9 +1044,27 @@ copyButton.addEventListener("click", async () => {
   }
 });
 
-applyClipPreset("medium");
-applySharedSizePreset("medium");
-createUserRow({ label: "User 1", userId: "123456789012345678" });
-setActiveTab("shared");
-setStatus("");
-updateOutput();
+resumePreviousButton.addEventListener("click", () => {
+  const draft = readLocalDraft();
+  if (draft?.state) {
+    importState(draft.state);
+    setStatus("Loaded previous local draft.");
+  }
+  closeResumeModal();
+});
+
+resumeNewButton.addEventListener("click", () => {
+  clearLocalDraft();
+  closeResumeModal();
+  initializeDefaultState();
+  setStatus("Started a new draft.");
+});
+
+const initialDraft = readLocalDraft();
+
+if (initialDraft?.state) {
+  showResumeModal(initialDraft);
+} else {
+  clearLocalDraft();
+  initializeDefaultState();
+}

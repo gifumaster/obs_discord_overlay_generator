@@ -67,6 +67,51 @@ select {
   color: rgba(238, 244, 255, 0.72);
 }
 
+.resume-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(4, 7, 12, 0.68);
+  backdrop-filter: blur(12px);
+}
+
+.resume-modal[hidden] {
+  display: none;
+}
+
+.resume-dialog {
+  width: min(460px, calc(100vw - 32px));
+  padding: 22px;
+  border: 1px solid rgba(138, 212, 255, 0.16);
+  border-radius: 22px;
+  background: rgba(10, 15, 25, 0.96);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.38);
+}
+
+.resume-dialog h2,
+.resume-dialog p {
+  margin: 0;
+}
+
+.resume-copy {
+  margin-top: 10px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.resume-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.resume-actions .ghost {
+  flex: 1;
+}
+
 .settings-panel {
   grid-area: settings;
 }
@@ -613,6 +658,10 @@ summary:focus-visible {
 
   .app-meta-right {
     right: 10px;
+  }
+
+  .resume-actions {
+    flex-direction: column;
   }
 
   .panel {

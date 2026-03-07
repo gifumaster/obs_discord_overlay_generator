@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OBS Voice CSS Generator</title>
-  <link rel="stylesheet" href="./styles.css?v=20260307-14">
+  <link rel="stylesheet" href="./styles.css?v=20260307-17">
 </head>
 <body>
   <main class="app-shell">
@@ -215,7 +215,19 @@
     </section>
   </main>
 
-  <div class="app-meta app-meta-left" aria-label="Version">v20260307-14</div>
+  <div id="resume-modal" class="resume-modal" hidden>
+    <div class="resume-dialog" role="dialog" aria-modal="true" aria-labelledby="resume-title">
+      <p class="eyebrow">Resume Draft</p>
+      <h2 id="resume-title">Use the previous local draft?</h2>
+      <p id="resume-description" class="resume-copy">A locally saved draft is available from your last visit.</p>
+      <div class="resume-actions">
+        <button id="resume-previous" class="ghost primary" type="button">Use Previous Draft</button>
+        <button id="resume-new" class="ghost" type="button">Start New</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-meta app-meta-left" aria-label="Version">v20260307-17</div>
   <a
     class="app-meta app-meta-right"
     href="https://streamkit.discord.com/overlay"
@@ -278,6 +290,6 @@
     </article>
   </template>
 
-  <script src="./app.js?v=20260307-14"></script>
+  <script src="./app.js?v=20260307-17"></script>
 </body>
 </html>
