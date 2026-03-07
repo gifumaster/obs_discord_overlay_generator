@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OBS Voice CSS Generator</title>
-  <link rel="stylesheet" href="./styles.css?v=20260307-3">
+  <link rel="stylesheet" href="./styles.css?v=20260307-10">
 </head>
 <body>
   <main class="app-shell">
@@ -77,6 +77,7 @@
           <details id="shared-advanced-panel" class="full advanced-panel">
             <summary>Advanced</summary>
             <div class="advanced-grid">
+              <div class="full advanced-section-label">Selectors</div>
               <label>
                 <span>Container Selector</span>
                 <input id="container-selector" name="containerSelector" type="text" value=".voice_states" spellcheck="false">
@@ -92,6 +93,8 @@
                 <input id="z-index-base" name="zIndexBase" type="number" step="1" value="10">
               </label>
 
+              <div class="full advanced-divider" aria-hidden="true"></div>
+              <div class="full advanced-section-label">Image</div>
               <label>
                 <span>Resize Max Height (px)</span>
                 <input id="resize-max-height" name="resizeMaxHeight" type="number" min="1" step="1" value="384">
@@ -107,6 +110,8 @@
                 <input id="shared-display-height" name="sharedDisplayHeight" type="number" min="1" step="1" value="160">
               </label>
 
+              <div class="full advanced-divider" aria-hidden="true"></div>
+              <div class="full advanced-section-label">Clip</div>
               <label>
                 <span>Clip Left Top (%)</span>
                 <input id="clip-left-top" name="clipLeftTop" type="number" min="0" max="100" step="1" value="24">
@@ -127,6 +132,30 @@
                 <input id="clip-left-bottom" name="clipLeftBottom" type="number" min="0" max="100" step="1" value="0">
               </label>
 
+              <div class="full advanced-divider" aria-hidden="true"></div>
+              <div class="full advanced-section-label">Speaking Frame</div>
+              <label>
+                <span>Frame Color</span>
+                <input id="frame-color" name="frameColor" type="color" value="#ffffff">
+              </label>
+
+              <label>
+                <span>Frame Glow Color</span>
+                <input id="frame-glow-color" name="frameGlowColor" type="color" value="#ffffff">
+              </label>
+
+              <label>
+                <span>Frame Stroke Width (px)</span>
+                <input id="frame-stroke-width" name="frameStrokeWidth" type="number" min="0" step="0.5" value="2">
+              </label>
+
+              <label>
+                <span>Frame Glow Strength</span>
+                <input id="frame-glow-strength" name="frameGlowStrength" type="number" min="0.2" max="3" step="0.1" value="1">
+              </label>
+
+              <div class="full advanced-divider" aria-hidden="true"></div>
+              <div class="full advanced-section-label">Speaking Motion</div>
               <label>
                 <span>Bobbing Distance (px)</span>
                 <input id="bob-distance" name="bobDistance" type="number" min="0" step="1" value="4">
@@ -234,6 +263,6 @@
     </article>
   </template>
 
-  <script src="./app.js?v=20260307-3"></script>
+  <script src="./app.js?v=20260307-10"></script>
 </body>
 </html>

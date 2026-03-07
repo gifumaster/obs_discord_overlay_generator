@@ -24,6 +24,10 @@ const clipLeftBottomField = document.querySelector("#clip-left-bottom");
 const sharedSizePresetField = document.querySelector("#shared-size-preset");
 const sharedDisplayWidthField = document.querySelector("#shared-display-width");
 const sharedDisplayHeightField = document.querySelector("#shared-display-height");
+const frameColorField = document.querySelector("#frame-color");
+const frameGlowColorField = document.querySelector("#frame-glow-color");
+const frameStrokeWidthField = document.querySelector("#frame-stroke-width");
+const frameGlowStrengthField = document.querySelector("#frame-glow-strength");
 
 const CLIP_PRESETS = {
   light: { clipLeftTop: 18, clipRightTop: 100, clipRightBottom: 82, clipLeftBottom: 0 },
@@ -123,6 +127,29 @@ function sanitizeSelector(selector, fallback) {
   return trimmed || fallback;
 }
 
+function normalizeHexColor(value, fallback) {
+  const trimmed = String(value || "").trim();
+  return /^#[0-9a-fA-F]{6}$/.test(trimmed) ? trimmed.toLowerCase() : fallback;
+}
+
+function hexToRgba(value, alpha, fallback = "#ffffff") {
+  const hex = normalizeHexColor(value, fallback).slice(1);
+  const red = Number.parseInt(hex.slice(0, 2), 16);
+  const green = Number.parseInt(hex.slice(2, 4), 16);
+  const blue = Number.parseInt(hex.slice(4, 6), 16);
+  const safeAlpha = Math.max(0, Math.min(1, Number(alpha) || 0));
+  return `rgba(${red}, ${green}, ${blue}, ${safeAlpha})`;
+}
+
+function clampNumber(value, min, max, fallback) {
+  const number = Number(value);
+  if (Number.isNaN(number)) {
+    return fallback;
+  }
+
+  return Math.min(max, Math.max(min, number));
+}
+
 function applyClipPreset(presetName) {
   const preset = CLIP_PRESETS[presetName];
   if (!preset) {
@@ -173,6 +200,10 @@ function readSharedSettings() {
     sharedSizePreset: sharedSizePresetField.value,
     sharedDisplayWidth: Math.max(1, Number(sharedDisplayWidthField.value) || 90),
     sharedDisplayHeight: Math.max(1, Number(sharedDisplayHeightField.value) || 160),
+    frameColor: normalizeHexColor(frameColorField.value, "#ffffff"),
+    frameGlowColor: normalizeHexColor(frameGlowColorField.value, "#ffffff"),
+    frameStrokeWidth: Math.max(0, Number(frameStrokeWidthField.value ?? 2)),
+    frameGlowStrength: clampNumber(frameGlowStrengthField.value, 0.2, 3, 1),
     advancedOpen: sharedAdvancedPanel.open,
     enableGlow: document.querySelector("#enable-glow").checked,
     enableBobbing: document.querySelector("#enable-bobbing").checked
@@ -191,6 +222,10 @@ function setSharedSettings(sharedSettings) {
   sharedSizePresetField.value = sharedSettings.sharedSizePreset || "medium";
   sharedDisplayWidthField.value = String(sharedSettings.sharedDisplayWidth ?? 90);
   sharedDisplayHeightField.value = String(sharedSettings.sharedDisplayHeight ?? 160);
+  frameColorField.value = normalizeHexColor(sharedSettings.frameColor, "#ffffff");
+  frameGlowColorField.value = normalizeHexColor(sharedSettings.frameGlowColor, "#ffffff");
+  frameStrokeWidthField.value = String(sharedSettings.frameStrokeWidth ?? 2);
+  frameGlowStrengthField.value = String(sharedSettings.frameGlowStrength ?? 1);
   sharedAdvancedPanel.open = sharedSettings.advancedOpen ?? false;
   document.querySelector("#bob-distance").value = String(sharedSettings.bobDistance ?? 4);
   document.querySelector("#bob-duration").value = String(sharedSettings.bobDuration ?? 0.6);
@@ -231,9 +266,50 @@ function buildSpeakingBlock(sharedSettings) {
   return lines.join("\n");
 }
 
+function buildSpeakingFrameBlock(sharedSettings) {
+  const lines = [];
+
+  if (sharedSettings.enableBobbing) {
+    lines.push(`  animation: obsVoiceBob ${sharedSettings.bobDuration}s ease-in-out infinite;`);
+  }
+
+  return lines.join("\n");
+}
+
+function buildClipFrameDataUrl(sharedSettings) {
+  const strokeWidth = Math.max(0, Number(sharedSettings.frameStrokeWidth ?? 2));
+  const halfStroke = strokeWidth / 2;
+  const width = Math.max(1, sharedSettings.sharedDisplayWidth);
+  const height = Math.max(1, sharedSettings.sharedDisplayHeight);
+  const points = [
+    `${(sharedSettings.clipLeftTop / 100) * width},${halfStroke}`,
+    `${(sharedSettings.clipRightTop / 100) * width},${halfStroke}`,
+    `${(sharedSettings.clipRightBottom / 100) * width},${height - halfStroke}`,
+    `${(sharedSettings.clipLeftBottom / 100) * width},${height - halfStroke}`
+  ].join(" ");
+  if (strokeWidth === 0) {
+    return `data:image/svg+xml;utf8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}"></svg>`)}`;
+  }
+
+  const svg = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}">
+  <polygon
+    points="${points}"
+    fill="none"
+    stroke="${normalizeHexColor(sharedSettings.frameColor, "#ffffff")}"
+    stroke-width="${strokeWidth}"
+    stroke-linejoin="round"
+  />
+</svg>`;
+
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
+
 function buildUserCss(sharedSettings, user) {
   const userId = sanitizeSelectorValue(user.userId, "USER_ID_HERE");
   const dataUrl = user.dataUrl || SAMPLE_IMAGE_DATA_URL;
+  const frameDataUrl = buildClipFrameDataUrl(sharedSettings);
+  const glowStrength = clampNumber(sharedSettings.frameGlowStrength, 0.2, 3, 1);
   const nameGap = 6;
   const nameHeight = 26;
   const nameInset = 4;
@@ -300,8 +376,32 @@ li[data-userid="${userId}"]::before {
   transition: filter 0.15s ease;
 }
 
+li[data-userid="${userId}"]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: ${displayWidth}px;
+  height: ${displayHeight}px;
+  background: url("${frameDataUrl}") center / 100% 100% no-repeat;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 11;
+  filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0));
+  transition: opacity 0.15s ease, filter 0.15s ease;
+}
+
 li[data-userid="${userId}"].${sharedSettings.speakingClass}::before {
 ${buildSpeakingBlock(sharedSettings)}
+}
+
+li[data-userid="${userId}"].${sharedSettings.speakingClass}::after {
+  opacity: 1;
+  filter:
+    drop-shadow(0 0 ${Math.max(1, Math.round(3 * glowStrength))}px ${hexToRgba(sharedSettings.frameGlowColor, Math.min(1, 0.98 * glowStrength))})
+    drop-shadow(0 0 ${Math.max(2, Math.round(8 * glowStrength))}px ${hexToRgba(sharedSettings.frameGlowColor, Math.min(1, 0.72 * glowStrength))})
+    drop-shadow(0 0 ${Math.max(4, Math.round(18 * glowStrength))}px ${hexToRgba(sharedSettings.frameGlowColor, Math.min(1, 0.42 * glowStrength))});
+${buildSpeakingFrameBlock(sharedSettings)}
 }`;
 }
 
@@ -409,6 +509,7 @@ function renderPreview() {
   const clipPath =
     `polygon(${sharedSettings.clipLeftTop}% 0, ${sharedSettings.clipRightTop}% 0, ` +
     `${sharedSettings.clipRightBottom}% 100%, ${sharedSettings.clipLeftBottom}% 100%)`;
+  const frameDataUrl = buildClipFrameDataUrl(sharedSettings);
   const slotStep = Math.max(0, sharedSettings.slotSpacing - sharedSettings.overlap);
   const nameGap = 6;
   const labelHeight = 26;
@@ -444,6 +545,7 @@ function renderPreview() {
     );
     const card = document.createElement("div");
     const avatar = document.createElement("div");
+    const frame = document.createElement("div");
 
     card.className = "preview-card";
     if (user.speaking) {
@@ -472,6 +574,18 @@ function renderPreview() {
     }
 
     card.append(avatar);
+
+    frame.className = "preview-frame";
+    frame.style.width = `${sharedSettings.sharedDisplayWidth}px`;
+    frame.style.height = `${sharedSettings.sharedDisplayHeight}px`;
+    frame.style.backgroundImage = `url("${frameDataUrl}")`;
+    frame.style.setProperty("--preview-frame-glow-near", hexToRgba(sharedSettings.frameGlowColor, Math.min(1, 0.98 * clampNumber(sharedSettings.frameGlowStrength, 0.2, 3, 1))));
+    frame.style.setProperty("--preview-frame-glow-mid", hexToRgba(sharedSettings.frameGlowColor, Math.min(1, 0.72 * clampNumber(sharedSettings.frameGlowStrength, 0.2, 3, 1))));
+    frame.style.setProperty("--preview-frame-glow-far", hexToRgba(sharedSettings.frameGlowColor, Math.min(1, 0.42 * clampNumber(sharedSettings.frameGlowStrength, 0.2, 3, 1))));
+    frame.style.setProperty("--preview-frame-glow-radius-near", `${Math.max(1, Math.round(3 * clampNumber(sharedSettings.frameGlowStrength, 0.2, 3, 1)))}px`);
+    frame.style.setProperty("--preview-frame-glow-radius-mid", `${Math.max(2, Math.round(8 * clampNumber(sharedSettings.frameGlowStrength, 0.2, 3, 1)))}px`);
+    frame.style.setProperty("--preview-frame-glow-radius-far", `${Math.max(4, Math.round(18 * clampNumber(sharedSettings.frameGlowStrength, 0.2, 3, 1)))}px`);
+    card.append(frame);
 
     const label = document.createElement("div");
     label.className = "preview-label";

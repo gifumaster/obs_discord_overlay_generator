@@ -50,6 +50,9 @@ select {
 
 .preview-panel {
   grid-area: preview;
+  position: sticky;
+  top: 16px;
+  z-index: 5;
 }
 
 .output {
@@ -261,6 +264,20 @@ select option {
   padding: 14px;
 }
 
+.advanced-section-label {
+  margin-top: 2px;
+  color: var(--accent);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.advanced-divider {
+  height: 1px;
+  margin: 4px 0 0;
+  background: linear-gradient(90deg, rgba(138, 212, 255, 0.24), rgba(255, 255, 255, 0.04));
+}
+
 .users-header,
 .output-actions,
 .user-card-header {
@@ -458,11 +475,36 @@ summary:focus-visible {
   transition: filter 0.15s ease;
 }
 
+.preview-frame {
+  position: absolute;
+  left: 0;
+  top: 0;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  opacity: 0;
+  pointer-events: none;
+  filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0));
+  transition: opacity 0.15s ease, filter 0.15s ease;
+}
+
 .preview-card.is-speaking .preview-avatar {
   filter: brightness(1.34) saturate(0.72) contrast(1.08);
 }
 
+.preview-card.is-speaking .preview-frame {
+  opacity: 1;
+  filter:
+    drop-shadow(0 0 var(--preview-frame-glow-radius-near, 3px) var(--preview-frame-glow-near, rgba(255, 255, 255, 0.98)))
+    drop-shadow(0 0 var(--preview-frame-glow-radius-mid, 8px) var(--preview-frame-glow-mid, rgba(255, 255, 255, 0.72)))
+    drop-shadow(0 0 var(--preview-frame-glow-radius-far, 18px) var(--preview-frame-glow-far, rgba(255, 255, 255, 0.42)));
+}
+
 .preview-card.is-speaking.is-bobbing .preview-avatar {
+  animation: previewBob var(--preview-bob-duration, 0.6s) ease-in-out infinite;
+}
+
+.preview-card.is-speaking.is-bobbing .preview-frame {
   animation: previewBob var(--preview-bob-duration, 0.6s) ease-in-out infinite;
 }
 
@@ -523,6 +565,10 @@ summary:focus-visible {
       "preview"
       "settings"
       "output";
+  }
+
+  .preview-panel {
+    position: static;
   }
 }
 
