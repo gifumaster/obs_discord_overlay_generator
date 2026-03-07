@@ -44,6 +44,29 @@ select {
   align-items: start;
 }
 
+.app-meta {
+  position: fixed;
+  bottom: 10px;
+  z-index: 20;
+  color: rgba(238, 244, 255, 0.42);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+}
+
+.app-meta-left {
+  left: 14px;
+}
+
+.app-meta-right {
+  right: 14px;
+}
+
+.app-meta-right:hover,
+.app-meta-right:focus-visible {
+  color: rgba(238, 244, 255, 0.72);
+}
+
 .settings-panel {
   grid-area: settings;
 }
@@ -577,6 +600,19 @@ summary:focus-visible {
     width: min(100vw - 18px, 1400px);
     margin: 9px auto;
     gap: 14px;
+  }
+
+  .app-meta {
+    bottom: 8px;
+    font-size: 0.68rem;
+  }
+
+  .app-meta-left {
+    left: 10px;
+  }
+
+  .app-meta-right {
+    right: 10px;
   }
 
   .panel {
