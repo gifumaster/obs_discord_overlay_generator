@@ -567,7 +567,7 @@ summary:focus-visible {
 
 .preview-stage {
   margin-top: 18px;
-  min-height: 220px;
+  min-height: 180px;
   padding: 20px;
   border-radius: 20px;
   background:
@@ -578,7 +578,7 @@ summary:focus-visible {
 
 .preview-canvas {
   position: relative;
-  min-height: 280px;
+  min-height: 220px;
   min-width: 100%;
 }
 

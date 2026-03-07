@@ -631,7 +631,7 @@ function getOrCreateUserTabElements(user) {
   }
 
   const button = document.createElement("button");
-  const toggle = document.createElement("label");
+  const toggle = document.createElement("span");
   const toggleInput = document.createElement("input");
   const toggleText = document.createElement("span");
 
