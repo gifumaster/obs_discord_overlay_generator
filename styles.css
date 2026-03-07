@@ -127,10 +127,25 @@ select {
   grid-area: output;
 }
 
+.settings-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 18px;
+}
+
 .tab-bar {
   display: flex;
   gap: 10px;
-  margin-top: 18px;
+}
+
+.settings-toolbar-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex: 0 0 auto;
 }
 
 .tab-button {
@@ -367,6 +382,11 @@ select option {
   gap: 12px;
 }
 
+.compact-action {
+  min-height: 42px;
+  padding: 8px 14px;
+}
+
 .user-list {
   margin-top: 18px;
   display: grid;
@@ -560,9 +580,7 @@ summary:focus-visible {
 
 .output-actions {
   margin-top: 18px;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+  display: flex;
 }
 
 .preview-stage {
@@ -740,11 +758,16 @@ summary:focus-visible {
   }
 
   .file-row,
+  .settings-toolbar,
   .users-header,
   .output-actions,
   .user-card-header,
   .user-card-actions {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .settings-toolbar-actions {
+    justify-content: stretch;
   }
 }

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OBS Discord Overlay Generator</title>
-  <link rel="stylesheet" href="./styles.css?v=20260307-33">
+  <link rel="stylesheet" href="./styles.css?v=20260307-35">
 </head>
 <body>
   <main class="app-shell">
@@ -12,9 +12,18 @@
       <div class="panel-header">
         <p class="eyebrow">OBS Discord Overlay CSS</p>
       </div>
-      <div class="tab-bar" role="tablist" aria-label="設定タブ">
-        <button id="tab-shared" class="tab-button is-active" type="button" role="tab" aria-selected="true" aria-controls="panel-shared">共通設定</button>
-        <button id="tab-users" class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="panel-users">ユーザー設定</button>
+      <div class="settings-toolbar">
+        <div class="tab-bar" role="tablist" aria-label="設定タブ">
+          <button id="tab-shared" class="tab-button is-active" type="button" role="tab" aria-selected="true" aria-controls="panel-shared">共通設定</button>
+          <button id="tab-users" class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="panel-users">ユーザー設定</button>
+        </div>
+        <div class="settings-toolbar-actions">
+          <label class="ghost file-action compact-action">
+            <span>読込</span>
+            <input id="load-json" type="file" accept="application/json">
+          </label>
+          <button id="save-json" class="ghost compact-action" type="button">保存</button>
+        </div>
       </div>
 
       <section id="panel-shared" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-shared">
@@ -185,6 +194,7 @@
         <p id="user-empty-state" class="user-empty-state" hidden>ユーザーはまだありません。まず「ユーザー追加」で1人目を作成してください。</p>
         <div id="user-list" class="user-list single-user"></div>
       </section>
+
     </section>
 
     <section class="panel output">
@@ -192,11 +202,6 @@
         <p class="eyebrow">生成CSS</p>
       </div>
       <div class="output-actions">
-        <label class="ghost file-action">
-          <span>JSON読込</span>
-          <input id="load-json" type="file" accept="application/json">
-        </label>
-        <button id="save-json" class="ghost" type="button">JSON保存</button>
         <button id="copy-css" class="ghost primary" type="button">CSSをコピー</button>
       </div>
       <textarea id="css-output" class="css-output" rows="24" readonly></textarea>
@@ -226,7 +231,7 @@
     </div>
   </div>
 
-  <div class="app-meta app-meta-left" aria-label="バージョン">v20260307-33</div>
+  <div class="app-meta app-meta-left" aria-label="バージョン">v20260307-35</div>
   <a
     class="app-meta app-meta-right"
     href="https://streamkit.discord.com/overlay"
@@ -284,6 +289,6 @@
     </article>
   </template>
 
-  <script src="./app.js?v=20260307-33"></script>
+  <script src="./app.js?v=20260307-35"></script>
 </body>
 </html>
