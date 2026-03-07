@@ -7,6 +7,9 @@ const loadJsonField = document.querySelector("#load-json");
 const copyButton = document.querySelector("#copy-css");
 const copyStatus = document.querySelector("#copy-status");
 const output = document.querySelector("#css-output");
+const openHelpButton = document.querySelector("#open-help");
+const helpModal = document.querySelector("#help-modal");
+const closeHelpButton = document.querySelector("#close-help");
 const resumeModal = document.querySelector("#resume-modal");
 const resumeDescription = document.querySelector("#resume-description");
 const resumePreviousButton = document.querySelector("#resume-previous");
@@ -160,6 +163,14 @@ function setActiveTab(tabName) {
 
 function closeResumeModal() {
   resumeModal.hidden = true;
+}
+
+function closeHelpModal() {
+  helpModal.hidden = true;
+}
+
+function openHelpModal() {
+  helpModal.hidden = false;
 }
 
 function showResumeModal(draft) {
@@ -619,6 +630,26 @@ resumeNewButton.addEventListener("click", () => {
   closeResumeModal();
   initializeDefaultState();
   setStatus("新しい状態を開始しました。");
+});
+
+openHelpButton.addEventListener("click", () => {
+  openHelpModal();
+});
+
+closeHelpButton.addEventListener("click", () => {
+  closeHelpModal();
+});
+
+helpModal.addEventListener("click", (event) => {
+  if (event.target === helpModal) {
+    closeHelpModal();
+  }
+});
+
+window.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !helpModal.hidden) {
+    closeHelpModal();
+  }
 });
 
 const initialDraft = readLocalDraft();

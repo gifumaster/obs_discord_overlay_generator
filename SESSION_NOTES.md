@@ -128,3 +128,6 @@
   - modal crop UI with drag and zoom
   - output is saved back into the user's `dataUrl`
   - crop aspect ratio follows `sharedDisplayWidth / sharedDisplayHeight`
+- Added help flow:
+  - `使い方` button in the settings toolbar
+  - modal with the shortest usage steps from setup to OBS paste

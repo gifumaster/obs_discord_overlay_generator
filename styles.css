@@ -187,6 +187,38 @@ select {
   margin-top: 18px;
 }
 
+.help-dialog {
+  width: min(560px, calc(100vw - 32px));
+}
+
+.help-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.help-header h2 {
+  margin: 0;
+}
+
+.help-list {
+  margin: 18px 0 0;
+  padding-left: 22px;
+  color: var(--accent-strong);
+  line-height: 1.6;
+}
+
+.help-list li + li {
+  margin-top: 8px;
+}
+
+.help-note {
+  margin: 16px 0 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
 .resume-actions .ghost {
   flex: 1;
 }
@@ -310,6 +342,19 @@ select {
 .file-picker > span,
 .user-grid label > span:first-child {
   color: var(--accent-strong);
+}
+
+.field-help-link {
+  margin-left: 8px;
+  color: var(--accent);
+  font-size: 0.84em;
+  text-decoration: none;
+}
+
+.field-help-link:hover,
+.field-help-link:focus-visible {
+  color: var(--text);
+  text-decoration: underline;
 }
 
 
@@ -826,6 +871,10 @@ summary:focus-visible {
   }
 
   .resume-actions {
+    flex-direction: column;
+  }
+
+  .help-header {
     flex-direction: column;
   }
 

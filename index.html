@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OBS Discord Overlay Generator</title>
-  <link rel="stylesheet" href="./styles.css?v=20260307-37">
+  <link rel="stylesheet" href="./styles.css?v=20260307-38">
 </head>
 <body>
   <main class="app-shell">
@@ -18,6 +18,7 @@
           <button id="tab-users" class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="panel-users">ユーザー設定</button>
         </div>
         <div class="settings-toolbar-actions">
+          <button id="open-help" class="ghost compact-action" type="button">使い方</button>
           <label class="ghost file-action compact-action">
             <span>読込</span>
             <input id="load-json" type="file" accept="application/json">
@@ -26,6 +27,7 @@
         </div>
       </div>
 
+      <p id="copy-status" class="copy-status" aria-live="polite"></p>
       <section id="panel-shared" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-shared">
       <form id="shared-form" class="form-grid">
           <label>
@@ -205,7 +207,6 @@
         <button id="copy-css" class="ghost primary" type="button">CSSをコピー</button>
       </div>
       <textarea id="css-output" class="css-output" rows="24" readonly></textarea>
-      <p id="copy-status" class="copy-status" aria-live="polite"></p>
     </section>
 
     <section class="panel preview-panel">
@@ -228,6 +229,27 @@
         <button id="resume-previous" class="ghost primary" type="button">前回の続きを使う</button>
         <button id="resume-new" class="ghost" type="button">新規作成</button>
       </div>
+    </div>
+  </div>
+
+  <div id="help-modal" class="resume-modal" hidden>
+    <div class="resume-dialog help-dialog" role="dialog" aria-modal="true" aria-labelledby="help-title">
+      <div class="help-header">
+        <div>
+          <p class="eyebrow">使い方</p>
+          <h2 id="help-title">最短手順</h2>
+        </div>
+        <button id="close-help" class="ghost compact-action" type="button">閉じる</button>
+      </div>
+      <ol class="help-list">
+        <li>共有設定でサイズや発話時の見た目を決めます。</li>
+        <li>ユーザー設定でユーザーを追加します。</li>
+        <li>画像を読み込み、必要ならトリミングで表示範囲を調整します。</li>
+        <li>Discord User ID と上下位置を必要に応じて調整します。</li>
+        <li>右側の `CSSをコピー` で生成結果をコピーします。</li>
+        <li>OBS の Discord Streamkit Overlay のカスタムCSS欄へ貼り付けます。</li>
+      </ol>
+      <p class="help-note">JSON保存 / 読込を使うと、設定をバックアップしたり別環境へ持ち運べます。</p>
     </div>
   </div>
 
@@ -258,7 +280,7 @@
     </div>
   </div>
 
-  <div class="app-meta app-meta-left" aria-label="バージョン">v20260307-37</div>
+  <div class="app-meta app-meta-left" aria-label="バージョン">v20260307-38</div>
   <a
     class="app-meta app-meta-right"
     href="https://streamkit.discord.com/overlay"
@@ -292,7 +314,17 @@
         </label>
 
         <label>
-          <span>Discord User ID</span>
+          <span>
+            Discord User ID
+            <a
+              class="field-help-link"
+              href="https://support.discord.com/hc/ja/articles/206346498-%E3%83%A6%E3%83%BC%E3%82%B6%E3%83%BC-%E3%82%B5%E3%83%BC%E3%83%90%E3%83%BC-%E3%83%A1%E3%83%83%E3%82%BB%E3%83%BC%E3%82%B8ID%E3%81%AF%E3%81%A9%E3%81%93%E3%81%A7%E8%A6%8B%E3%81%A4%E3%81%91%E3%82%89%E3%82%8C%E3%82%8B"
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              見つけ方
+            </a>
+          </span>
           <input class="user-id" type="text" placeholder="123456789012345678" spellcheck="false">
         </label>
 
@@ -317,12 +349,12 @@
     </article>
   </template>
 
-  <script src="./css-generator.js?v=20260307-37"></script>
-  <script src="./state-io.js?v=20260307-37"></script>
-  <script src="./preview.js?v=20260307-37"></script>
-  <script src="./user-editor.js?v=20260307-37"></script>
-  <script src="./shared-settings.js?v=20260307-37"></script>
-  <script src="./image-cropper.js?v=20260307-37"></script>
-  <script src="./app.js?v=20260307-37"></script>
+  <script src="./css-generator.js?v=20260307-38"></script>
+  <script src="./state-io.js?v=20260307-38"></script>
+  <script src="./preview.js?v=20260307-38"></script>
+  <script src="./user-editor.js?v=20260307-38"></script>
+  <script src="./shared-settings.js?v=20260307-38"></script>
+  <script src="./image-cropper.js?v=20260307-38"></script>
+  <script src="./app.js?v=20260307-38"></script>
 </body>
 </html>
