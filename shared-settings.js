@@ -106,7 +106,7 @@ window.OBSOverlaySharedSettings = (() => {
     }
   }
 
-  function applySharedSizePreset(presetName, deps) {
+  function applySharedSizePreset(presetName, deps, includeSlotSpacing = false) {
     const preset = deps.sizePresets[presetName];
     if (!preset) {
       return;
@@ -114,7 +114,10 @@ window.OBSOverlaySharedSettings = (() => {
 
     deps.sharedDisplayWidthField.value = String(preset.displayWidth);
     deps.sharedDisplayHeightField.value = String(preset.displayHeight);
-    deps.slotSpacingField.value = String(preset.slotSpacing);
+
+    if (includeSlotSpacing) {
+      deps.slotSpacingField.value = String(preset.slotSpacing);
+    }
   }
 
   function detectSharedSizePreset(deps) {
@@ -133,7 +136,7 @@ window.OBSOverlaySharedSettings = (() => {
     deps.setActiveUserId(null);
     deps.resetNextUserNumber();
     applyClipPreset("medium", deps);
-    applySharedSizePreset("medium", deps);
+    applySharedSizePreset("medium", deps, true);
     deps.createUserRow({ label: "ユーザー 1", userId: "123456789012345678" });
     deps.setActiveTab("shared");
     deps.setStatus("");
