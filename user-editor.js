@@ -95,6 +95,7 @@ window.OBSOverlayUserEditor = (() => {
     const speakingField = card.querySelector(".is-speaking");
     const dataUrlField = card.querySelector(".data-url");
     const fileField = card.querySelector(".image-file");
+    const cropButton = card.querySelector(".crop-user-image");
     const moveLeftButton = card.querySelector(".move-user-left");
     const moveRightButton = card.querySelector(".move-user-right");
     const removeButton = card.querySelector(".remove-user");
@@ -143,6 +144,14 @@ window.OBSOverlayUserEditor = (() => {
         deps.setStatus("画像の取り込みに失敗しました。別の画像で試してください。", "error", true);
       } finally {
         fileField.value = "";
+      }
+    });
+
+    cropButton.addEventListener("click", async () => {
+      try {
+        await deps.openUserImageCropper(user.internalId, dataUrlField);
+      } catch (error) {
+        deps.setStatus("画像トリミングに失敗しました。別の画像で試してください。", "error", true);
       }
     });
 

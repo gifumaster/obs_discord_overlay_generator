@@ -123,3 +123,8 @@
 ## Current Status
 - No major known functional issue at hand
 - Latest behavior change: image preset changes do not overwrite `slotSpacing`
+- Added image cropping flow:
+  - per-user `トリミング` button in the user editor
+  - modal crop UI with drag and zoom
+  - output is saved back into the user's `dataUrl`
+  - crop aspect ratio follows `sharedDisplayWidth / sharedDisplayHeight`

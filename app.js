@@ -63,6 +63,7 @@ const {
   scheduleLocalDraftSave
 } = window.OBSOverlayStateIO;
 const { renderPreview: renderPreviewPanel } = window.OBSOverlayPreview;
+const { openImageCropper } = window.OBSOverlayImageCropper;
 const {
   createUserRow: createUserRowPanel,
   renderActiveUserEditor: renderActiveUserEditorPanel,
@@ -374,6 +375,7 @@ function createUserRow(initialValues = {}) {
     incrementNextUserNumber: () => {
       nextUserNumber += 1;
     },
+    openUserImageCropper,
     renderActiveUserEditor,
     renderUserTabs,
     setActiveUserId: (value) => {
@@ -469,6 +471,35 @@ async function applyUserImageFile(userInternalId, dataUrlField, file) {
   }
 
   setStatus("");
+  updateOutput();
+  return true;
+}
+
+async function openUserImageCropper(userInternalId, dataUrlField) {
+  const targetUser = usersState.find((entry) => entry.internalId === userInternalId);
+  const sourceDataUrl = dataUrlField.value.trim() || targetUser?.dataUrl || "";
+
+  if (!sourceDataUrl) {
+    setStatus("先に画像を読み込んでください。", "error", true);
+    return false;
+  }
+
+  const sharedSettings = readSharedSettings();
+  const croppedDataUrl = await openImageCropper({
+    sourceDataUrl,
+    aspectRatio: Math.max(1, sharedSettings.sharedDisplayWidth) / Math.max(1, sharedSettings.sharedDisplayHeight)
+  });
+
+  if (!croppedDataUrl) {
+    return false;
+  }
+
+  dataUrlField.value = croppedDataUrl;
+  if (targetUser) {
+    targetUser.dataUrl = croppedDataUrl;
+  }
+
+  setStatus("画像をトリミングしました。");
   updateOutput();
   return true;
 }

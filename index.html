@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OBS Discord Overlay Generator</title>
-  <link rel="stylesheet" href="./styles.css?v=20260307-36">
+  <link rel="stylesheet" href="./styles.css?v=20260307-37">
 </head>
 <body>
   <main class="app-shell">
@@ -231,7 +231,34 @@
     </div>
   </div>
 
-  <div class="app-meta app-meta-left" aria-label="バージョン">v20260307-36</div>
+  <div id="cropper-modal" class="resume-modal cropper-modal" hidden>
+    <div class="cropper-dialog" role="dialog" aria-modal="true" aria-labelledby="cropper-title">
+      <div class="cropper-header">
+        <div>
+          <p class="eyebrow">画像トリミング</p>
+          <h2 id="cropper-title">表示する範囲を調整</h2>
+        </div>
+        <button id="cropper-close" class="ghost compact-action" type="button">閉じる</button>
+      </div>
+      <p class="cropper-copy">ドラッグで位置を動かし、スライダーで拡大率を調整します。</p>
+      <div id="cropper-viewport" class="cropper-viewport">
+        <img id="cropper-image" class="cropper-image" alt="" draggable="false">
+        <div id="cropper-selection" class="cropper-selection" aria-hidden="true"></div>
+      </div>
+      <div class="cropper-controls">
+        <label class="cropper-zoom">
+          <span>拡大率</span>
+          <input id="cropper-zoom" type="range" min="1" max="4" step="0.01" value="1">
+        </label>
+      </div>
+      <div class="resume-actions">
+        <button id="cropper-cancel" class="ghost" type="button">キャンセル</button>
+        <button id="cropper-apply" class="ghost primary" type="button">適用</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-meta app-meta-left" aria-label="バージョン">v20260307-37</div>
   <a
     class="app-meta app-meta-right"
     href="https://streamkit.discord.com/overlay"
@@ -284,16 +311,18 @@
             <span>画像ファイル読込 / 画像を貼り付け</span>
             <input class="image-file" type="file" accept="image/*">
           </label>
+          <button class="ghost crop-user-image" type="button">トリミング</button>
         </div>
       </div>
     </article>
   </template>
 
-  <script src="./css-generator.js?v=20260307-36"></script>
-  <script src="./state-io.js?v=20260307-36"></script>
-  <script src="./preview.js?v=20260307-36"></script>
-  <script src="./user-editor.js?v=20260307-36"></script>
-  <script src="./shared-settings.js?v=20260307-36"></script>
-  <script src="./app.js?v=20260307-36"></script>
+  <script src="./css-generator.js?v=20260307-37"></script>
+  <script src="./state-io.js?v=20260307-37"></script>
+  <script src="./preview.js?v=20260307-37"></script>
+  <script src="./user-editor.js?v=20260307-37"></script>
+  <script src="./shared-settings.js?v=20260307-37"></script>
+  <script src="./image-cropper.js?v=20260307-37"></script>
+  <script src="./app.js?v=20260307-37"></script>
 </body>
 </html>
