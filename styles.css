@@ -223,6 +223,18 @@ select {
   grid-column: 1 / -1;
 }
 
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
 input[type="text"],
 input[type="number"],
 select,
@@ -370,7 +382,29 @@ select option {
   gap: 10px;
   margin-top: 18px;
   overflow-x: auto;
-  padding-bottom: 4px;
+  padding: 2px 2px 8px;
+  scrollbar-gutter: stable both-edges;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(138, 212, 255, 0.32) rgba(255, 255, 255, 0.05);
+}
+
+.user-tab-bar::-webkit-scrollbar {
+  height: 8px;
+}
+
+.user-tab-bar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 999px;
+}
+
+.user-tab-bar::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, rgba(138, 212, 255, 0.28), rgba(138, 212, 255, 0.42));
+  border-radius: 999px;
+  border: 1px solid rgba(8, 16, 27, 0.42);
+}
+
+.user-tab-bar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, rgba(138, 212, 255, 0.36), rgba(138, 212, 255, 0.54));
 }
 
 .user-empty-state {
@@ -383,8 +417,13 @@ select option {
 }
 
 .user-tab-button {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
   min-height: 40px;
-  max-width: 220px;
+  min-width: 136px;
+  max-width: 260px;
   padding: 8px 12px;
   border: 1px solid rgba(138, 212, 255, 0.16);
   border-radius: 12px;
@@ -404,6 +443,30 @@ select option {
 
 .user-tab-button.is-disabled-user {
   opacity: 0.56;
+}
+
+.user-tab-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  width: 100%;
+  color: inherit;
+  white-space: nowrap;
+}
+
+.user-tab-toggle input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+.user-tab-toggle span {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .user-tab-button:focus-visible,

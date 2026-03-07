@@ -252,8 +252,8 @@ function closeResumeModal() {
 function showResumeModal(draft) {
   const savedAtLabel = formatSavedAt(draft.savedAt);
   resumeDescription.textContent = savedAtLabel
-    ? `A locally saved draft from ${savedAtLabel} is available.`
-    : "A locally saved draft is available from your last visit.";
+    ? `${savedAtLabel} に保存されたローカル下書きがあります。`
+    : "前回保存されたローカル下書きがあります。";
   resumeModal.hidden = false;
 }
 
@@ -263,7 +263,7 @@ function initializeDefaultState() {
   nextUserNumber = 1;
   applyClipPreset("medium");
   applySharedSizePreset("medium");
-  createUserRow({ label: "User 1", userId: "123456789012345678" });
+  createUserRow({ label: "ユーザー 1", userId: "123456789012345678" });
   setActiveTab("shared");
   setStatus("");
   updateOutput();
@@ -307,7 +307,7 @@ function readSharedSettings() {
     overlap: Math.max(0, Number(document.querySelector("#overlap").value) || 30),
     stackLeftPadding: Math.max(0, Number(document.querySelector("#stack-left-padding").value) || 18),
     zIndexBase: Number(document.querySelector("#z-index-base").value) || 10,
-    minHeight: Math.max(1, Number(document.querySelector("#min-height").value) || 96),
+    minHeight: clampNumber(document.querySelector("#min-height").value, 1, 480, 96),
     clipPreset: clipPresetField.value,
     clipLeftTop: clampPercent(clipLeftTopField.value, 24),
     clipRightTop: clampPercent(clipRightTopField.value, 100),
@@ -338,7 +338,7 @@ function setSharedSettings(sharedSettings) {
   document.querySelector("#overlap").value = String(sharedSettings.overlap ?? 30);
   document.querySelector("#stack-left-padding").value = String(sharedSettings.stackLeftPadding ?? 18);
   document.querySelector("#z-index-base").value = String(sharedSettings.zIndexBase ?? 10);
-  document.querySelector("#min-height").value = String(sharedSettings.minHeight ?? 96);
+  document.querySelector("#min-height").value = String(clampNumber(sharedSettings.minHeight, 1, 480, 96));
   document.querySelector("#resize-max-width").value = String(sharedSettings.resizeMaxWidth ?? 216);
   document.querySelector("#resize-max-height").value = String(sharedSettings.resizeMaxHeight ?? 384);
   sharedSizePresetField.value = sharedSettings.sharedSizePreset || "medium";
@@ -570,7 +570,7 @@ ${userCssBlocks}${bobKeyframes}
 
 function updateUserTitle(card) {
   const label = card.querySelector(".user-label").value.trim();
-  card.querySelector(".user-card-title").textContent = label || "User";
+  card.querySelector(".user-card-title").textContent = label || "ユーザー";
 }
 
 function applySharedSizePreset(presetName) {
@@ -620,7 +620,7 @@ function importState(state) {
 
   const users = Array.isArray(state.users) && state.users.length > 0
     ? state.users
-    : [{ label: "User 1", userId: "" }];
+    : [{ label: "ユーザー 1", userId: "" }];
 
   users.forEach((user) => createUserRow(user));
   activeUserId = usersState[0]?.internalId || null;
@@ -718,7 +718,7 @@ function renderPreview() {
 
     const label = document.createElement("div");
     label.className = "preview-label";
-    label.textContent = user.label || user.userId || "User";
+    label.textContent = user.label || user.userId || "ユーザー";
     label.style.top = `${sharedSettings.sharedDisplayHeight + nameGap}px`;
     label.style.left = `${nameInset}px`;
     label.style.width = `${nameWidth}px`;
@@ -732,7 +732,7 @@ function renderPreview() {
 function createUserRow(initialValues = {}) {
   const user = {
     internalId: `user-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    label: initialValues.label || `User ${nextUserNumber}`,
+    label: initialValues.label || `ユーザー ${nextUserNumber}`,
     userId: initialValues.userId || "",
     topOffset: Number(initialValues.topOffset) || 0,
     enabled: initialValues.enabled ?? true,
@@ -746,7 +746,6 @@ function createUserRow(initialValues = {}) {
   const labelField = card.querySelector(".user-label");
   const userIdField = card.querySelector(".user-id");
   const topOffsetField = card.querySelector(".top-offset");
-  const enabledField = card.querySelector(".is-enabled");
   const speakingField = card.querySelector(".is-speaking");
   const dataUrlField = card.querySelector(".data-url");
   const fileField = card.querySelector(".image-file");
@@ -757,7 +756,6 @@ function createUserRow(initialValues = {}) {
   labelField.value = user.label;
   userIdField.value = user.userId;
   topOffsetField.value = String(user.topOffset);
-  enabledField.checked = user.enabled;
   speakingField.checked = user.speaking;
   dataUrlField.value = user.dataUrl;
 
@@ -778,7 +776,6 @@ function createUserRow(initialValues = {}) {
     targetUser.label = labelField.value.trim();
     targetUser.userId = userIdField.value.trim();
     targetUser.topOffset = Number(topOffsetField.value) || 0;
-    targetUser.enabled = enabledField.checked;
     targetUser.speaking = speakingField.checked;
     targetUser.dataUrl = dataUrlField.value.trim();
     card.classList.toggle("is-disabled", !targetUser.enabled);
@@ -796,7 +793,7 @@ function createUserRow(initialValues = {}) {
     try {
       await applyUserImageFile(user.internalId, dataUrlField, file);
     } catch (error) {
-      setStatus("Image resize failed. Try a different file.", "error", true);
+      setStatus("画像の縮小に失敗しました。別の画像で試してください。", "error", true);
     } finally {
       fileField.value = "";
     }
@@ -815,9 +812,9 @@ function createUserRow(initialValues = {}) {
 
     try {
       await applyUserImageFile(user.internalId, dataUrlField, file);
-      setStatus("Pasted image from clipboard.");
+      setStatus("クリップボードの画像を貼り付けました。");
     } catch (error) {
-      setStatus("Clipboard image paste failed.", "error", true);
+      setStatus("クリップボード画像の貼り付けに失敗しました。", "error", true);
     }
   });
 
@@ -871,6 +868,9 @@ function renderUserTabs() {
 
   usersState.forEach((user, index) => {
     const button = document.createElement("button");
+    const toggle = document.createElement("label");
+    const toggleInput = document.createElement("input");
+    const toggleText = document.createElement("span");
     button.type = "button";
     button.className = "user-tab-button";
     button.setAttribute("role", "tab");
@@ -883,7 +883,6 @@ function renderUserTabs() {
     button.classList.toggle("is-disabled-user", !user.enabled);
     button.setAttribute("aria-selected", String(isActive));
     button.tabIndex = isActive ? 0 : -1;
-    button.textContent = user.label || user.userId || `User ${usersState.indexOf(user) + 1}`;
     button.addEventListener("click", () => {
       activeUserId = user.internalId;
       renderUserTabs();
@@ -902,6 +901,25 @@ function renderUserTabs() {
       renderActiveUserEditor();
       userTabBar.querySelector(".user-tab-button.is-active")?.focus();
     });
+
+    toggle.className = "user-tab-toggle";
+    toggleInput.type = "checkbox";
+    toggleInput.checked = user.enabled;
+    toggleInput.setAttribute("aria-label", "表示する");
+    toggleInput.addEventListener("click", (event) => {
+      event.stopPropagation();
+    });
+    toggleInput.addEventListener("change", () => {
+      user.enabled = toggleInput.checked;
+      user.editorCard?.classList.toggle("is-disabled", !user.enabled);
+      setStatus("");
+      renderUserTabs();
+      updateOutput();
+    });
+    toggleText.textContent = user.label || user.userId || `ユーザー ${usersState.indexOf(user) + 1}`;
+    toggle.append(toggleInput, toggleText);
+
+    button.append(toggle);
     userTabBar.append(button);
   });
 }
@@ -1063,7 +1081,7 @@ saveJsonButton.addEventListener("click", () => {
   anchor.download = "obs-voice-css-config.json";
   anchor.click();
   URL.revokeObjectURL(url);
-  setStatus("Saved JSON config.");
+  setStatus("JSON設定を保存しました。");
 });
 
 loadJsonField.addEventListener("change", async (event) => {
@@ -1075,9 +1093,9 @@ loadJsonField.addEventListener("change", async (event) => {
   try {
     const text = await file.text();
     importState(JSON.parse(text));
-    setStatus("Loaded JSON config.");
+    setStatus("JSON設定を読み込みました。");
   } catch (error) {
-    setStatus("JSON load failed. Check the file format.", "error", true);
+    setStatus("JSONの読込に失敗しました。ファイル形式を確認してください。", "error", true);
   } finally {
     loadJsonField.value = "";
   }
@@ -1086,9 +1104,9 @@ loadJsonField.addEventListener("change", async (event) => {
 copyButton.addEventListener("click", async () => {
   try {
     await navigator.clipboard.writeText(output.value);
-    setStatus("Copied CSS to clipboard.");
+    setStatus("CSSをクリップボードにコピーしました。");
   } catch (error) {
-    setStatus("Clipboard copy failed. Copy the CSS manually.", "error", true);
+    setStatus("クリップボードへのコピーに失敗しました。手動でコピーしてください。", "error", true);
   }
 });
 
@@ -1096,7 +1114,7 @@ resumePreviousButton.addEventListener("click", () => {
   const draft = readLocalDraft();
   if (draft?.state) {
     importState(draft.state);
-    setStatus("Loaded previous local draft.");
+    setStatus("前回のローカル下書きを読み込みました。");
   }
   closeResumeModal();
 });
@@ -1105,7 +1123,7 @@ resumeNewButton.addEventListener("click", () => {
   clearLocalDraft();
   closeResumeModal();
   initializeDefaultState();
-  setStatus("Started a new draft.");
+  setStatus("新しい下書きを開始しました。");
 });
 
 const initialDraft = readLocalDraft();
