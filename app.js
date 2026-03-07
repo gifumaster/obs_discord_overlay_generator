@@ -32,6 +32,7 @@ const frameColorField = document.querySelector("#frame-color");
 const frameGlowColorField = document.querySelector("#frame-glow-color");
 const frameStrokeWidthField = document.querySelector("#frame-stroke-width");
 const frameGlowStrengthField = document.querySelector("#frame-glow-strength");
+const speakingFilterStrengthField = document.querySelector("#speaking-filter-strength");
 
 const CLIP_PRESETS = {
   light: { clipLeftTop: 18, clipRightTop: 100, clipRightBottom: 82, clipLeftBottom: 0 },
@@ -159,6 +160,18 @@ function clampNumber(value, min, max, fallback) {
 
 function clampFrameCoordinate(value, min, max) {
   return Math.min(max, Math.max(min, value));
+}
+
+function lerpNumber(start, end, amount) {
+  return start + ((end - start) * amount);
+}
+
+function buildSpeakingFilterValue(strengthValue) {
+  const strength = clampNumber(strengthValue, 0, 2, 1);
+  const brightness = lerpNumber(0.86, 1.34, strength);
+  const saturate = lerpNumber(0.92, 0.72, strength);
+  const contrast = lerpNumber(1, 1.08, strength);
+  return `brightness(${brightness.toFixed(3)}) saturate(${saturate.toFixed(3)}) contrast(${contrast.toFixed(3)})`;
 }
 
 function scheduleLocalDraftSave() {
@@ -311,6 +324,7 @@ function readSharedSettings() {
     frameGlowColor: normalizeHexColor(frameGlowColorField.value, "#ffffff"),
     frameStrokeWidth: Math.max(0, Number(frameStrokeWidthField.value ?? 2)),
     frameGlowStrength: clampNumber(frameGlowStrengthField.value, 0.2, 3, 1),
+    speakingFilterStrength: clampNumber(speakingFilterStrengthField.value, 0, 2, 0.5),
     advancedOpen: sharedAdvancedPanel.open,
     enableGlow: document.querySelector("#enable-glow").checked,
     enableBobbing: document.querySelector("#enable-bobbing").checked
@@ -334,6 +348,7 @@ function setSharedSettings(sharedSettings) {
   frameGlowColorField.value = normalizeHexColor(sharedSettings.frameGlowColor, "#ffffff");
   frameStrokeWidthField.value = String(sharedSettings.frameStrokeWidth ?? 2);
   frameGlowStrengthField.value = String(sharedSettings.frameGlowStrength ?? 1);
+  speakingFilterStrengthField.value = String(sharedSettings.speakingFilterStrength ?? 0.5);
   sharedAdvancedPanel.open = sharedSettings.advancedOpen ?? false;
   document.querySelector("#bob-distance").value = String(sharedSettings.bobDistance ?? 4);
   document.querySelector("#bob-duration").value = String(sharedSettings.bobDuration ?? 0.6);
@@ -360,7 +375,7 @@ function buildSpeakingBlock(sharedSettings) {
   const lines = [];
 
   if (sharedSettings.enableGlow) {
-    lines.push("  filter: brightness(1.34) saturate(0.72) contrast(1.08);");
+    lines.push(`  filter: ${buildSpeakingFilterValue(sharedSettings.speakingFilterStrength)};`);
   }
 
   if (sharedSettings.enableBobbing) {
@@ -681,6 +696,7 @@ function renderPreview() {
     avatar.style.height = `${sharedSettings.sharedDisplayHeight}px`;
     avatar.style.backgroundImage = `url("${user.dataUrl || SAMPLE_IMAGE_DATA_URL}")`;
     avatar.style.clipPath = clipPath;
+    avatar.style.setProperty("--preview-speaking-filter", buildSpeakingFilterValue(sharedSettings.speakingFilterStrength));
 
     if (!sharedSettings.enableGlow) {
       avatar.style.filter = "none";

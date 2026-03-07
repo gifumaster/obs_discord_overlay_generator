@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OBS Voice CSS Generator</title>
-  <link rel="stylesheet" href="./styles.css?v=20260307-19">
+  <link rel="stylesheet" href="./styles.css?v=20260307-21">
 </head>
 <body>
   <main class="app-shell">
@@ -161,6 +161,11 @@
               <div class="full advanced-divider" aria-hidden="true"></div>
               <div class="full advanced-section-label">Speaking Motion</div>
               <label>
+                <span>Speaking Filter Strength</span>
+                <input id="speaking-filter-strength" name="speakingFilterStrength" type="number" min="0" max="2" step="0.1" value="0.5">
+              </label>
+
+              <label>
                 <span>Bobbing Distance (px)</span>
                 <input id="bob-distance" name="bobDistance" type="number" min="0" step="1" value="4">
               </label>
@@ -224,7 +229,7 @@
     </div>
   </div>
 
-  <div class="app-meta app-meta-left" aria-label="Version">v20260307-19</div>
+  <div class="app-meta app-meta-left" aria-label="Version">v20260307-21</div>
   <a
     class="app-meta app-meta-right"
     href="https://streamkit.discord.com/overlay"
@@ -287,6 +292,6 @@
     </article>
   </template>
 
-  <script src="./app.js?v=20260307-19"></script>
+  <script src="./app.js?v=20260307-21"></script>
 </body>
 </html>

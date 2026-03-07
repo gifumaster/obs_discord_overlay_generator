@@ -557,7 +557,7 @@ summary:focus-visible {
 }
 
 .preview-card.is-speaking .preview-avatar {
-  filter: brightness(1.34) saturate(0.72) contrast(1.08);
+  filter: var(--preview-speaking-filter, brightness(1.34) saturate(0.72) contrast(1.08));
 }
 
 .preview-card.is-speaking .preview-frame {
