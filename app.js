@@ -90,10 +90,10 @@ const CLIP_PRESETS = {
 };
 
 const SIZE_PRESETS = {
-  small: { displayWidth: 72, displayHeight: 128, slotSpacing: 92 },
-  medium: { displayWidth: 90, displayHeight: 160, slotSpacing: 108 },
-  large: { displayWidth: 108, displayHeight: 192, slotSpacing: 126 },
-  xlarge: { displayWidth: 126, displayHeight: 224, slotSpacing: 144 }
+  small: { displayWidth: 108, displayHeight: 192, slotSpacing: 126 },
+  medium: { displayWidth: 126, displayHeight: 224, slotSpacing: 144 },
+  large: { displayWidth: 144, displayHeight: 256, slotSpacing: 162 },
+  xlarge: { displayWidth: 162, displayHeight: 288, slotSpacing: 180 }
 };
 
 const SAMPLE_IMAGE_DATA_URL = `data:image/svg+xml;utf8,${encodeURIComponent(`

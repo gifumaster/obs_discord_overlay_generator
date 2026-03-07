@@ -131,3 +131,8 @@
 - Added help flow:
   - `使い方` button in the settings toolbar
   - modal with the shortest usage steps from setup to OBS paste
+- Updated shared image size presets upward:
+  - `small` now matches the old `large`
+  - `medium` now matches the old `xlarge`
+  - `large` is one step larger than the old `xlarge`
+  - `xlarge` was moved up as well to preserve ordering
