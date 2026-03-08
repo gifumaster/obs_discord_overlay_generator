@@ -122,6 +122,8 @@
 ## Current Status
 - No major known functional issue at hand
 - Latest behavior change: image preset changes do not overwrite `slotSpacing`
+- Latest layout behavior change: generated CSS now compacts visible OBS users without gaps when intermediate configured users are absent
+- Latest visibility behavior change: generated CSS now hides unsupported OBS users that do not match configured `data-userid` entries
 - Added image cropping flow:
   - per-user `トリミング` button in the user editor
   - modal crop UI with drag and zoom

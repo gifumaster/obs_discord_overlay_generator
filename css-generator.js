@@ -123,14 +123,15 @@ window.OBSOverlayCssGenerator = (() => {
     const clipPath =
       `polygon(${sharedSettings.clipLeftTop}% 0, ${sharedSettings.clipRightTop}% 0, ` +
       `${sharedSettings.clipRightBottom}% 100%, ${sharedSettings.clipLeftBottom}% 100%)`;
-    const slotStep = Math.max(0, sharedSettings.slotSpacing - sharedSettings.overlap);
-    const slotLeft = sharedSettings.stackLeftPadding + ((user.slotNumber - 1) * slotStep);
     const itemZIndex = sharedSettings.zIndexBase + user.slotNumber;
+    const slotStep = Math.max(0, sharedSettings.slotSpacing - sharedSettings.overlap);
     const nameWidth = Math.max(36, Math.min(displayWidth - nameInset, slotStep || displayWidth) - nameInset);
 
     return `li[data-userid="${userId}"] {
-  position: absolute;
-  left: ${slotLeft}px;
+  position: relative;
+  order: ${user.slotNumber};
+  flex: 0 0 auto;
+  align-self: flex-start;
   top: ${user.topOffset}px;
   width: ${displayWidth}px;
   min-height: ${Math.max(sharedSettings.minHeight, displayHeight + nameGap + nameHeight)}px;
@@ -216,6 +217,14 @@ ${buildSpeakingFrameBlock(sharedSettings)}
       .map((user, index) => ({ ...user, slotNumber: index + 1 }));
     const speakingClass = sharedSettings.speakingClass.replace(/[^a-zA-Z0-9_-]/g, "") || "wrapper_speaking";
     const containerSelector = sanitizeSelector(sharedSettings.containerSelector, ".voice_states");
+    const enabledUserIdSelectors = enabledUsers
+      .map((user) => `[data-userid="${sanitizeSelectorValue(user.userId, "USER_ID_HERE")}"]`);
+    const enabledUserSelectors = enabledUsers
+      .map((selector) => `${containerSelector} > li${selector}`)
+      .join(",\n");
+    const unsupportedUserSelector = enabledUserIdSelectors.length
+      ? `${containerSelector} > li:not(${enabledUserIdSelectors.join("):not(")})`
+      : "";
     const maxUserHeight = enabledUsers.reduce(
       (currentMax, user) => Math.max(currentMax, sharedSettings.sharedDisplayHeight + Math.abs(user.topOffset)),
       sharedSettings.minHeight
@@ -233,14 +242,35 @@ ${buildSpeakingFrameBlock(sharedSettings)}
     transform: translateY(0);
   }
 }` : "";
+    const slotStep = Math.max(0, sharedSettings.slotSpacing - sharedSettings.overlap);
+    const displayWidth = sharedSettings.sharedDisplayWidth;
+    const stackAdvance = slotStep - displayWidth;
+    const leadingInset = sharedSettings.stackLeftPadding + displayWidth - slotStep;
     const userCssBlocks = enabledUsers
       .map((user) => buildUserCss({ ...sharedSettings, speakingClass }, user, sampleImageDataUrl))
       .join("\n\n");
 
     return `${containerSelector} {
   position: relative;
+  display: flex !important;
+  align-items: flex-start;
+  flex-wrap: nowrap;
   min-height: ${Math.max(sharedSettings.minHeight, maxUserHeight)}px;
+  padding-left: ${leadingInset}px;
   overflow: visible !important;
+}
+
+${containerSelector} > li {
+  list-style: none;
+}
+
+${unsupportedUserSelector ? `${unsupportedUserSelector} {
+  display: none !important;
+}
+
+` : ""}${enabledUserSelectors || `${containerSelector} > li[data-userid="USER_ID_HERE"]`} {
+  display: block !important;
+  margin-left: ${stackAdvance}px !important;
 }
 
 ${userCssBlocks}${bobKeyframes}
