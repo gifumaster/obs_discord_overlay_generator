@@ -65,8 +65,7 @@
 ## JSON / Local Draft
 - `JSON読込` / `JSON保存` are in the settings toolbar
 - Last draft is best-effort saved to localStorage
-- Local draft key:
-  - `obs-discord-overlay-generator:last-state`
+- Local draft key: `obs-discord-overlay-generator:last-state`
 - On startup, if a valid previous draft exists, do not auto-load it
 - Show modal choices instead:
   - `前回の続きを使う`

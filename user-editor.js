@@ -203,6 +203,7 @@ window.OBSOverlayUserEditor = (() => {
     });
 
     removeButton.addEventListener("click", () => {
+      deps.removeUserSourceImageDataUrl(user.internalId);
       const currentUsers = deps.getUsersState().filter((entry) => entry.internalId !== user.internalId);
       deps.setUsersState(currentUsers);
       if (deps.getActiveUserId() === user.internalId) {

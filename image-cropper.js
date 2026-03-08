@@ -3,6 +3,7 @@ window.OBSOverlayImageCropper = (() => {
   const viewport = document.querySelector("#cropper-viewport");
   const image = document.querySelector("#cropper-image");
   const selection = document.querySelector("#cropper-selection");
+  const sourceBadge = document.querySelector("#cropper-source-badge");
   const zoomField = document.querySelector("#cropper-zoom");
   const closeButton = document.querySelector("#cropper-close");
   const cancelButton = document.querySelector("#cropper-cancel");
@@ -159,7 +160,7 @@ window.OBSOverlayImageCropper = (() => {
     return canvas.toDataURL("image/png");
   }
 
-  async function openImageCropper({ sourceDataUrl, aspectRatio }) {
+  async function openImageCropper({ sourceDataUrl, aspectRatio, usesOriginalSource = false }) {
     if (!modal || !viewport || !image || !selection || !zoomField || !closeButton || !cancelButton || !applyButton) {
       throw new Error("Cropper UI is unavailable.");
     }
@@ -246,7 +247,10 @@ window.OBSOverlayImageCropper = (() => {
       modal.hidden = false;
       image.src = sourceDataUrl;
       zoomField.value = "1";
-
+      if (sourceBadge) {
+        sourceBadge.textContent = usesOriginalSource ? "オリジナル画像" : "保存済み画像";
+        sourceBadge.dataset.sourceKind = usesOriginalSource ? "original" : "saved";
+      }
       requestAnimationFrame(() => {
         try {
           const { viewportRect, cropRect } = measureCropRect(aspectRatio);

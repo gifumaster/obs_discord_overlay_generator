@@ -118,6 +118,29 @@ select {
   line-height: 1.5;
 }
 
+.cropper-source-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  margin: 10px 0 0;
+  padding: 0 14px;
+  border: 1px solid rgba(110, 205, 255, 0.28);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(7, 28, 52, 0.92), rgba(5, 21, 42, 0.92));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  color: #d9f2ff;
+  font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.01em;
+}
+
+.cropper-source-badge[data-source-kind="saved"] {
+  border-color: rgba(231, 205, 97, 0.34);
+  background: linear-gradient(180deg, rgba(55, 47, 12, 0.92), rgba(38, 32, 8, 0.92));
+  color: #f4dc7a;
+}
+
 .cropper-viewport {
   position: relative;
   min-height: 420px;

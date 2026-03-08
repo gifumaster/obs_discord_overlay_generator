@@ -126,6 +126,7 @@ let usersState = [];
 let activeUserId = null;
 let statusTimeoutId = null;
 let outputFrameRequestId = 0;
+const userSourceImageDataUrls = new Map();
 
 function setStatus(message = "", type = "info", persist = false) {
   if (statusTimeoutId) {
@@ -298,6 +299,7 @@ function readUserRows() {
 function resetUsersState() {
   usersState = [];
   nextUserNumber = 1;
+  userSourceImageDataUrls.clear();
 }
 
 function applySharedSizePreset(presetName) {
@@ -389,6 +391,7 @@ function createUserRow(initialValues = {}) {
     openUserImageCropper,
     renderActiveUserEditor,
     renderUserTabs,
+    removeUserSourceImageDataUrl,
     setActiveUserId: (value) => {
       activeUserId = value;
     },
@@ -426,40 +429,64 @@ function renderActiveUserEditor() {
   });
 }
 
-function resizeImageToDataUrl(file, maxWidth, maxHeight, mimeType = "image/png", quality = 0.92) {
+function readFileAsDataUrl(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 
-    reader.onload = () => {
-      const image = new Image();
-
-      image.onload = () => {
-        const widthRatio = maxWidth / image.width;
-        const heightRatio = maxHeight / image.height;
-        const scale = Math.min(widthRatio, heightRatio, 1);
-        const targetWidth = Math.max(1, Math.round(image.width * scale));
-        const targetHeight = Math.max(1, Math.round(image.height * scale));
-        const canvas = document.createElement("canvas");
-        const context = canvas.getContext("2d");
-
-        if (!context) {
-          reject(new Error("Canvas 2D context is unavailable."));
-          return;
-        }
-
-        canvas.width = targetWidth;
-        canvas.height = targetHeight;
-        context.drawImage(image, 0, 0, targetWidth, targetHeight);
-        resolve(canvas.toDataURL(mimeType, quality));
-      };
-
-      image.onerror = () => reject(new Error("Failed to load image."));
-      image.src = typeof reader.result === "string" ? reader.result : "";
-    };
-
+    reader.onload = () => resolve(typeof reader.result === "string" ? reader.result : "");
     reader.onerror = () => reject(new Error("Failed to read file."));
     reader.readAsDataURL(file);
   });
+}
+
+function resizeImageSourceToDataUrl(sourceDataUrl, maxWidth, maxHeight, mimeType = "image/png", quality = 0.92) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+
+    image.onload = () => {
+      const widthRatio = maxWidth / image.width;
+      const heightRatio = maxHeight / image.height;
+      const scale = Math.min(widthRatio, heightRatio, 1);
+      const targetWidth = Math.max(1, Math.round(image.width * scale));
+      const targetHeight = Math.max(1, Math.round(image.height * scale));
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+
+      if (!context) {
+        reject(new Error("Canvas 2D context is unavailable."));
+        return;
+      }
+
+      canvas.width = targetWidth;
+      canvas.height = targetHeight;
+      context.drawImage(image, 0, 0, targetWidth, targetHeight);
+      resolve(canvas.toDataURL(mimeType, quality));
+    };
+
+    image.onerror = () => reject(new Error("Failed to load image."));
+    image.src = sourceDataUrl;
+  });
+}
+
+function setUserSourceImageDataUrl(userInternalId, sourceDataUrl) {
+  if (!userInternalId) {
+    return;
+  }
+
+  if (sourceDataUrl) {
+    userSourceImageDataUrls.set(userInternalId, sourceDataUrl);
+    return;
+  }
+
+  userSourceImageDataUrls.delete(userInternalId);
+}
+
+function removeUserSourceImageDataUrl(userInternalId) {
+  if (!userInternalId) {
+    return;
+  }
+
+  userSourceImageDataUrls.delete(userInternalId);
 }
 
 async function applyUserImageFile(userInternalId, dataUrlField, file) {
@@ -468,13 +495,15 @@ async function applyUserImageFile(userInternalId, dataUrlField, file) {
   }
 
   const sharedSettings = readSharedSettings();
-  const resizedDataUrl = await resizeImageToDataUrl(
-    file,
+  const sourceDataUrl = await readFileAsDataUrl(file);
+  const resizedDataUrl = await resizeImageSourceToDataUrl(
+    sourceDataUrl,
     sharedSettings.resizeMaxWidth,
     sharedSettings.resizeMaxHeight,
     "image/png"
   );
 
+  setUserSourceImageDataUrl(userInternalId, sourceDataUrl);
   dataUrlField.value = resizedDataUrl;
   const targetUser = usersState.find((entry) => entry.internalId === userInternalId);
   if (targetUser) {
@@ -488,7 +517,11 @@ async function applyUserImageFile(userInternalId, dataUrlField, file) {
 
 async function openUserImageCropper(userInternalId, dataUrlField) {
   const targetUser = usersState.find((entry) => entry.internalId === userInternalId);
-  const sourceDataUrl = dataUrlField.value.trim() || targetUser?.dataUrl || "";
+  const originalSourceDataUrl = userSourceImageDataUrls.get(userInternalId) || "";
+  const sourceDataUrl = originalSourceDataUrl
+    || dataUrlField.value.trim()
+    || targetUser?.dataUrl
+    || "";
 
   if (!sourceDataUrl) {
     setStatus("先に画像を読み込んでください。", "error", true);
@@ -498,16 +531,24 @@ async function openUserImageCropper(userInternalId, dataUrlField) {
   const sharedSettings = readSharedSettings();
   const croppedDataUrl = await openImageCropper({
     sourceDataUrl,
-    aspectRatio: Math.max(1, sharedSettings.sharedDisplayWidth) / Math.max(1, sharedSettings.sharedDisplayHeight)
+    aspectRatio: Math.max(1, sharedSettings.sharedDisplayWidth) / Math.max(1, sharedSettings.sharedDisplayHeight),
+    usesOriginalSource: Boolean(originalSourceDataUrl)
   });
 
   if (!croppedDataUrl) {
     return false;
   }
 
-  dataUrlField.value = croppedDataUrl;
+  const resizedDataUrl = await resizeImageSourceToDataUrl(
+    croppedDataUrl,
+    sharedSettings.resizeMaxWidth,
+    sharedSettings.resizeMaxHeight,
+    "image/png"
+  );
+
+  dataUrlField.value = resizedDataUrl;
   if (targetUser) {
-    targetUser.dataUrl = croppedDataUrl;
+    targetUser.dataUrl = resizedDataUrl;
   }
 
   setStatus("画像をトリミングしました。");
