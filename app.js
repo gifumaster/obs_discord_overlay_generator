@@ -324,7 +324,7 @@ function flushOutputUpdate() {
   outputFrameRequestId = 0;
   output.value = buildCssOutput(readSharedSettings(), readUserRows(), SAMPLE_IMAGE_DATA_URL);
   renderPreview();
-  scheduleLocalDraftSave(() => exportState());
+  scheduleLocalDraftSave(readSharedSettings, readUserRows);
 }
 
 function updateOutput({ immediate = false } = {}) {
@@ -657,8 +657,8 @@ copyButton.addEventListener("click", async () => {
   }
 });
 
-resumePreviousButton.addEventListener("click", () => {
-  const draft = readLocalDraft();
+resumePreviousButton.addEventListener("click", async () => {
+  const draft = await readLocalDraft();
   if (draft?.state) {
     importState(draft.state);
     setStatus("前回のローカル下書きを読み込みました。");
@@ -666,8 +666,8 @@ resumePreviousButton.addEventListener("click", () => {
   closeResumeModal();
 });
 
-resumeNewButton.addEventListener("click", () => {
-  clearLocalDraft();
+resumeNewButton.addEventListener("click", async () => {
+  await clearLocalDraft();
   closeResumeModal();
   initializeDefaultState();
   setStatus("新しい状態を開始しました。");
@@ -693,12 +693,17 @@ window.addEventListener("keydown", (event) => {
   }
 });
 
-const initialDraft = readLocalDraft();
+async function initializeApp() {
+  const initialDraft = await readLocalDraft();
 
-if (initialDraft?.state) {
-  showResumeModal(initialDraft);
-} else {
-  clearLocalDraft();
+  if (initialDraft?.state) {
+    showResumeModal(initialDraft);
+    return;
+  }
+
+  await clearLocalDraft();
   initializeDefaultState();
 }
+
+initializeApp();
 
