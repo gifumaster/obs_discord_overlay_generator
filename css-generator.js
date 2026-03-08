@@ -125,23 +125,23 @@ window.OBSOverlayCssGenerator = (() => {
       `${sharedSettings.clipRightBottom}% 100%, ${sharedSettings.clipLeftBottom}% 100%)`;
     const itemZIndex = sharedSettings.zIndexBase + user.slotNumber;
     const slotStep = Math.max(0, sharedSettings.slotSpacing - sharedSettings.overlap);
-    const slotShift = (user.slotNumber - 1) * (slotStep - displayWidth);
+    const slotWidth = Math.max(1, slotStep || displayWidth);
     const nameWidth = Math.max(36, Math.min(displayWidth - nameInset, slotStep || displayWidth) - nameInset);
 
     return `li[data-userid="${userId}"] {
   position: relative;
   order: ${user.slotNumber};
-  flex: 0 0 auto;
+  flex: 0 0 ${slotWidth}px;
   align-self: flex-start;
   top: ${user.topOffset}px;
-  width: ${displayWidth}px;
+  width: ${slotWidth}px;
+  min-width: ${slotWidth}px;
   min-height: ${Math.max(sharedSettings.minHeight, displayHeight + nameGap + nameHeight)}px;
   margin: 0 !important;
   padding: 0 !important;
   display: block !important;
   z-index: ${itemZIndex};
   overflow: visible !important;
-  transform: translateX(${slotShift}px);
 }
 
 li[data-userid="${userId}"] .voice_avatar {
@@ -244,9 +244,7 @@ ${buildSpeakingFrameBlock(sharedSettings)}
     transform: translateY(0);
   }
 }` : "";
-    const slotStep = Math.max(0, sharedSettings.slotSpacing - sharedSettings.overlap);
-    const displayWidth = sharedSettings.sharedDisplayWidth;
-    const leadingInset = sharedSettings.stackLeftPadding + displayWidth - slotStep;
+    const leadingInset = sharedSettings.stackLeftPadding;
     const userCssBlocks = enabledUsers
       .map((user) => buildUserCss({ ...sharedSettings, speakingClass }, user, sampleImageDataUrl))
       .join("\n\n");
@@ -272,6 +270,7 @@ ${unsupportedUserSelector ? `${unsupportedUserSelector} {
 ` : ""}${enabledUserSelectors || `${containerSelector} > li[data-userid="USER_ID_HERE"]`} {
   display: block !important;
   margin-left: 0 !important;
+  margin-right: 0 !important;
 }
 
 ${userCssBlocks}${bobKeyframes}
