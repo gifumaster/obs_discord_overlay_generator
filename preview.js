@@ -1,7 +1,7 @@
 window.OBSOverlayPreview = (() => {
   const previewCardElements = new Map();
 
-  function getOrCreatePreviewCardElements(user) {
+  function getOrCreatePreviewCardElements(user, deps) {
     const existing = previewCardElements.get(user.internalId);
     if (existing) {
       return existing;
@@ -13,9 +13,22 @@ window.OBSOverlayPreview = (() => {
     const label = document.createElement("div");
 
     card.className = "preview-card";
+    card.tabIndex = 0;
+    card.setAttribute("role", "button");
     avatar.className = "preview-avatar";
     frame.className = "preview-frame";
     label.className = "preview-label";
+    card.addEventListener("click", () => {
+      deps.selectUser(user.internalId);
+    });
+    card.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") {
+        return;
+      }
+
+      event.preventDefault();
+      deps.selectUser(user.internalId);
+    });
 
     card.append(avatar, frame, label);
 
@@ -29,6 +42,7 @@ window.OBSOverlayPreview = (() => {
     buildSpeakingFilterValue,
     clampNumber,
     hexToRgba,
+    selectUser,
     previewCanvas,
     previewEmptyState,
     sampleImageDataUrl,
@@ -91,11 +105,12 @@ window.OBSOverlayPreview = (() => {
         36,
         Math.min(sharedSettings.sharedDisplayWidth - nameInset, slotStep || sharedSettings.sharedDisplayWidth) - nameInset
       );
-      const { card, avatar, frame, label } = getOrCreatePreviewCardElements(user);
+      const { card, avatar, frame, label } = getOrCreatePreviewCardElements(user, { selectUser });
       const glowStrength = clampNumber(sharedSettings.frameGlowStrength, 0.2, 3, 1);
 
       card.classList.toggle("is-speaking", user.speaking);
       card.classList.toggle("is-bobbing", user.speaking && sharedSettings.enableBobbing);
+      card.setAttribute("aria-label", `${user.label || user.userId || "ユーザー"} の設定を開く`);
 
       card.style.left = `${left}px`;
       card.style.top = `${user.topOffset - minTop}px`;

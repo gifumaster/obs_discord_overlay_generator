@@ -767,6 +767,14 @@ summary:focus-visible {
 .preview-card {
   position: absolute;
   overflow: visible;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+}
+
+.preview-card:focus-visible {
+  outline: 2px solid rgba(138, 212, 255, 0.78);
+  outline-offset: 4px;
 }
 
 .preview-avatar {
